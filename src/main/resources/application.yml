@@ -1,0 +1,43 @@
+spring:
+  thymeleaf:
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+  datasource:
+    # 使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+
+  jackson:
+    # 允许某个属性为空
+    default-property-inclusion: non_null
+    serialization:
+      # 格式化输出
+      indent-output: true
+      # 格式化日期
+    date-format: yyyy-MM-dd HH:mm
+    time-zone: GMT+8
+    parser:
+      # 允许不存在的属性
+      allow-missing-values: true
+
+server:
+  servlet:
+    context-path: /
+  port: 443
+  ssl:
+    enabled: true
+    key-store: classpath:www.darkme.cn.jks
+    key-store-password: liu666.090797
+    key-store-type: JKS
+
+cos:
+  secret:
+    id: AKIDFKRetDGBkLzXu4iVt67zoTwpjw8OcQ9g
+    key: TtAIF0Y7YM1UXcdXJtKdppdFf2DF4hEx
+  bucket:
+    region: ap-shanghai
+    name:
+      b1: public1-1253931949
+      b60: public60-1253931949

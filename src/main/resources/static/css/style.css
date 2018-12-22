@@ -1,0 +1,188 @@
+body {
+    width: 100%;
+    height: 100%;
+    /*background: url("../img/girl.jpg") no-repeat center center fixed;*/
+    /*background-size: 100%;*/
+}
+
+a {
+    color: #000;
+}
+
+td, th {
+    text-align: center; /** 设置水平方向居中 */
+    line-height: 60px;
+    height: 50px;
+    display: table-cell;
+}
+
+.table-div {
+    margin-top: 200px;
+    position: absolute;
+    width: 100%;
+    /*margin-right: auto;*/
+    /*margin-left: auto;*/
+    z-index: 5;
+}
+
+.table {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: Arial, serif;
+    font-size: 16px;
+
+}
+
+.navbar-has-shadow {
+    box-shadow: 0 0 14px -6px rgba(0, 0, 0, .2) !important
+}
+
+/*.brand_icon {*/
+/*width: 20px;*/
+/*height: 20px;*/
+/*}*/
+.navbar {
+    /*background-color: #000000;*/
+}
+
+.ico {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    /*font-family: 'Glyphicons Halflings';*/
+    background: url("../ico.png") no-repeat center center fixed;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale
+}
+
+.middle {
+    width: 600px;
+    height: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.middle-info-div {
+    position: relative;
+    z-index: 5;
+}
+
+.right_info_area {
+    position: relative;
+    z-index: 5;
+}
+
+.main {
+    /*margin-top: 50px;*/
+
+    height: 100vh;
+    /*background:#F0FFFF;*/
+
+    background: url("https://darkme-res-1253931949.cos.ap-shanghai.myqcloud.com/bg.jpg") no-repeat center center fixed;
+
+    /*background: #E4E4E4;*/
+    /*background-size: 100%;*/
+    z-index: -1;
+    /*position: absolute;*/
+    background-size: cover;
+}
+
+.main::after {
+    /*content: "";*/
+
+    position: absolute;
+    background: inherit;
+    filter: blur(9px);
+    z-index: 2;
+}
+
+.main.a::after {
+    left: 4%;
+    top: 6%;
+    content: "";
+    width: 88%;
+    height: 90%;
+}
+
+/*.middle-info-div {*/
+/*margin-top: 50px;*/
+/*}*/
+.d_title {
+    height: 300px;
+    margin: 0;
+    width: 94%;
+    left: 3%;
+    position: absolute;
+    z-index: 10;
+}
+
+.login_div, .register_div, .left-personal-center {
+    position: absolute;
+    width: 100%;
+    z-index: 5;
+}
+
+#frame-div-container {
+    width: 88%;
+    height: 80%;
+    position: absolute;
+    top: 18%;
+    left: 4%;
+    right: 0;
+    color: #FFF;
+    text-align: center;
+    font-family: "lato", sans-serif;
+    font-weight: 300;
+    font-size: 50px;
+    letter-spacing: 10px;
+    margin-top: -60px;
+    /*padding-left: 10px;*/
+}
+
+#frame-div-container {
+    position: absolute;
+    z-index: 3;
+}
+
+/*.frame-middle-div {*/
+/*float:left;*/
+/*background: url("../img/girl.jpg") no-repeat fixed center;*/
+/*!*background:#F7F7F7;*!*/
+/*background-size:cover;*/
+/*-webkit-filter: blur(9px);*/
+/*-moz-filter: blur(9px);*/
+/*-o-filter: blur(9px);*/
+/*-ms-filter: blur(9px);*/
+/*filter:blur(9px);*/
+/*z-index: 1;*/
+/*}*/
+
+.lr_div_middle {
+    float: left;
+    /*background: url("../img/girl.jpg") no-repeat fixed center;*/
+    /*background:#F5F5F5;*/
+    background-size: cover;
+    -webkit-filter: blur(9px);
+    -moz-filter: blur(9px);
+    -o-filter: blur(9px);
+    -ms-filter: blur(9px);
+    filter: blur(12px);
+}
+
+.footer {
+    /*margin-top: 50px;*/
+    position: relative;
+    height: 50px;
+    background: #0f0f0f;
+}
+
+.foot {
+    padding-top: 15px;
+    color: #F7F7F7;
+    align-content: center;
+
+}

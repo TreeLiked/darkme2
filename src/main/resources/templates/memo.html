@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--suppress ThymeleafVariablesResolveInspection -->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--<link rel="stylesheet" type="text/css" th:href="@{/bootstrap/css/bootstrap.css}">-->
+    <link th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+
+    <!--<link rel="stylesheet" type="text/css" th:href="@{/css/hello.css}">-->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/memo.css}">
+
+    <script type="text/javascript" th:src="@{/js/jquery-3.3.1.js}"></script>
+    <script type="text/javascript" th:src="@{/js/memo.js}"></script>
+    <script type="text/javascript" th:src="@{/js/js.cookie.js}"></script>
+    <!--<script type="text/javascript" th:src="@{/js/up_down.js}"></script>-->
+    <!--<script type="text/javascript" th:src="@{/js/action.js}"></script>-->
+    <!--<script type="text/javascript" th:src="@{/js/mod_style.js}"></script>-->
+    <script type="text/javascript" th:src="@{/js/jquery.session.js}"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+
+    <!--<script type="text/javascript" th:src="@{/bootstrap/js/bootstrap.js}"></script>-->
+
+    <title>个人便签</title>
+    <script type="text/javascript">
+        $(function () {
+
+            memo_nav_change(0);
+        });
+
+    </script>
+</head>
+<body style="background-color: transparent " class="well-lg" >
+<div class="container-fluid" style="padding: 0">
+    <div class="hello-main" style="color: white">
+        <!--<div class="jumbotron">-->
+            <!--<h1>I have nothing to say!!!!!!!!</h1>-->
+        <!--</div>-->
+
+
+        <ul class="nav nav-pills nav-justified memo-nav">
+            <li role="presentation" class="active memo-nav-unfinished"><a href="javascript:void(0)" onclick="memo_nav_change(0)">未完成</a></li>
+            <li role="presentation"></li>
+            <li role="presentation" class="memo-nav-finished" ><a href="javascript:void(0)" onclick="memo_nav_change(1)">已完成</a></li>
+            <li role="presentation"></li>
+
+            <li role="presentation" ><a role="button" onclick="memo_nav_change(2)">新建</a></li>
+            <li role="presentation"><span th:text="${info}"></span></li>
+
+            <li role="presentation">
+                <button type="button" onclick="memo_nav_change(3)" class="btn btn-default" style="background-color: transparent; width: 100px">
+                <span    class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            </button></li>
+
+            <!--<li role="presentation" ></li>-->
+
+        </ul>
+
+        <div class="memo-content-div">
+            <!--<div class="panel panel-warning" th:each="memo : ${#httpServletRequest.getAttribute('mMemoList')}" th:if="${memo.memo_type} == 0 and ${memo.memo_state} == 0">-->
+
+                <!--<div class="panel-heading"><h3 class="panel-title" style="display: inline"  th:text="${memo.memo_title}">Memo title</h3>-->
+                    <!--<button type="button" class="btn btn-default btn-sm pull-right" style="background-color: transparent">-->
+                        <!--标记为完成<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>-->
+                    <!--</button></div>-->
+                <!--<div class="panel panel-body" th:text="${memo.memo_content}">-->
+                    <!--Memo Detail-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <!--<div class="panel panel-info" th:each="memo : ${mMemoList}" th:if="${memo.memo_type} == 1 and ${memo.memo_state} == 0">-->
+
+                <!--<div class="panel-heading"><h3 class="panel-title" style="display: inline"  th:text="${memo.memo_title}">Memo title</h3>-->
+                    <!--<button type="button" class="btn btn-default btn-sm pull-right" style="background-color: transparent">-->
+                        <!--标记为完成<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>-->
+                    <!--</button></div>-->
+                <!--<div class="panel panel-body" th:text="${memo.memo_content}">-->
+                    <!--Memo Detail-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <!--<div class="panel panel-success" th:each="memo : ${mMemoList}" th:if="${memo.memo_state} == 1">-->
+
+                <!--<div class="panel-heading"><h3 class="panel-title" style="display: inline"  th:text="${memo.memo_title}">Memo title</h3>-->
+                    <!--<button type="button" class="btn btn-default btn-sm pull-right" style="background-color: transparent">-->
+                        <!--标记为完成<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>-->
+                    <!--</button></div>-->
+                <!--<div class="panel panel-body" th:text="${memo.memo_content}">-->
+                    <!--Memo Detail-->
+                <!--</div>-->
+            <!--</div>-->
+
+        </div>
+
+
+        <div class="memo-right-function">
+
+            <form class="form-inline">
+
+
+                <div class="form-group">
+                    <!--<label for="search-memo-input">搜索</label>-->
+                    <input type="text" class="form-control" id="search-memo-input" style="background-color: transparent" placeholder="在这里搜索">
+                </div>
+
+                <button type="button" onsubmit="return false;" class="btn btn-default" onclick="search_memo()" style="background-color: transparent; color: white">搜索</button>
+            </form>
+            <hr>
+            <!--<h3>新建便签</h3>-->
+            <form>
+                <div class="form-group">
+                    <label for="newMemoTitle">标题</label>
+                    <input type="text" class="form-control" id="newMemoTitle" placeholder="20字以内" style="background-color: transparent">
+                </div>
+                <div class="form-group">
+                    <label for="newMemoContent">内容</label>
+                    <textarea id="newMemoContent" class="form-control" rows="4" style="background-color: transparent" placeholder="100字以内，与标题至少有一个不为空"></textarea>
+                </div>
+                <h6 style="display: inline">事件类别</h6>
+                <label class="radio-inline">
+                    <input type="radio" name="inlineRadioOptions" id="newMemoType1" checked = "checked" value="option1"> 一般
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="inlineRadioOptions" id="newMemoType2" value="option2"> 紧急
+                </label>
+
+                <br><br>
+                <button type="button" onsubmit="return false;" onclick="newMemo()" class="btn btn-default" style="background-color: transparent; color: white">新建便签</button>
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+</div>
+</body>
+</html>

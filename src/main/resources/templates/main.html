@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--suppress HtmlUnknownTarget -->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="baidu-site-verification" content="79bZQUEI5o" />
+    <title>ineffable</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/stars.css}">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap/css/bootstrap.min.css}">
+
+    <script type="text/javascript" th:src="@{js/jquery-3.3.1.js}"></script>
+    <!--<script th:src="@{https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js}"></script>-->
+    <script type="text/javascript" th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+
+
+</head>
+<style>
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    #main, #sky {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+</style>
+<script type="text/javascript">
+    $(function () {
+
+        $("#main").click(function () {
+            $(location).attr("href", $(location).attr("href") + "index");
+        });
+        var i = 5;
+        var $go_index = $("#go_index");
+
+        setTimeout(show1, 0);
+
+        var a = setInterval(countDown, 1000);
+        // $go_index.mouseover(function () {
+        //
+        //     $("#text").slideUp(5000);
+        // });
+        // $go_index.mouseout(function () {
+        //     $("#text").slideDown(3000);
+        // });
+        function show1() {
+            $("#text").fadeIn(3000);
+            $("#span").fadeIn(1000);
+            setTimeout(hide1, 2000);
+        }
+        function hide1() {
+            $("#text").fadeOut(5000);
+        }
+        function countDown() {
+            if (i > 0) {
+                $go_index.html(i);
+                i--;
+            } else {
+                clearInterval(a);
+                $(location).attr("href", $(location).attr("href") + "index");
+            }
+        }
+    });
+</script>
+<body>
+<div id="main" class="container-fluid">
+
+    <div id="sky">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="title">
+            <div id="text" style="display: none">每一个不曾起舞的日子，<br>都是对生命的辜负。<br></div>
+            <!--<h1>-->
+                <!--"这个世界"与"我"之间并不存在必然的关联，<br>这是我能想到的最大的自由。<br>-->
+            <!--</h1>-->
+            <span id="span" style="display: none"><a href="index" id="go_index">5</a></span>
+        </div>
+        <div id="stars3"></div>
+    </div>
+</div>
+
+</body>
+</html>

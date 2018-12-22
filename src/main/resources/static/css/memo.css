@@ -1,0 +1,27 @@
+.memo-nav {
+    margin-bottom: 50px;
+}
+.memo-content-div {
+    position: relative;
+    width: 60%;
+    left: 0;
+    display: inline-block;
+    /*#6f60b7*/
+}
+.memo-right-function {
+    position: absolute;
+    width: 30%;
+    left: 65%;
+    display: inline;
+}
+
+.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+    color: #fff;
+    background-color: rgba(87, 13, 200, 0.9);
+}
+.panel-body {
+    margin-bottom: 0;
+}
+.panel {
+    background-color: transparent;
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--<link rel="stylesheet" type="text/css" th:href="@{/bootstrap/css/bootstrap.css}">-->
+    <link th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/hello.css}">
+
+
+    <script type="text/javascript" th:src="@{/js/jquery-3.3.1.js}"></script>
+    <script type="text/javascript" th:src="@{/js/js.cookie.js}"></script>
+    <script type="text/javascript" th:src="@{/js/hello.js}"></script>
+    <script type="text/javascript" th:src="@{/js/change_page.js}"></script>
+    <!--<script type="text/javascript" th:src="@{/bootstrap/js/bootstrap.js}"></script>-->
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+
+    <title style="color: white"><span style="color: white">个人中心</span></title>
+</head>
+<!--在FunctionController-->
+<script type="text/javascript">
+    $(function () {
+        showAmountFlags();
+    });
+</script>
+<body style="background-color: transparent">
+<div class="container-fluid">
+    <div class="hello-main" style="color: white">
+
+        <!--<ol class="breadcrumb" style="background-color: transparent">-->
+        <!--<li><a href="#">Home</a></li>-->
+        <!--<li><a href="#">Library</a></li>-->
+        <!--<li class="active">Data</li>-->
+        <!--<li class="active" th:text="${username}"></li>-->
+        <!--</ol>-->
+        <ul id="sub_pages_ul" class="nav nav-tabs nav-justified">
+            <li id="sub_page0" role="presentation" class="active"><a href="javascript:void(0)"
+                                                                     onclick="change_page(0, '0')">Home</a></li>
+            <li id="sub_page1" role="presentation"><a href="javascript:void(0)" onclick="change_page(1, 'myFile')">文件
+                <span class="badge" id="file_amount_flag"></span></a></li>
+            <li id="sub_page2" role="presentation"><a href="javascript:void(0)" onclick="change_page(2, 'myMemo')">便签
+                <span class="badge" id="memo_amount_flag"></span></a></li>
+            <!--<li id="sub_page3" role="presentation"><a href="javascript:void(0)" onclick="change_page(3, 'myFriend')">好友</a></li>-->
+            <!--<li id="sub_page4" role="presentation"><a href="javascript:void(0)" onclick="change_page(4, 'myMsg')">消息-->
+                <!--<span class="badge" id="msg_amount_flag"></span></a></li>-->
+            <li id="sub_page5" role="presentation"><a href="javascript:void(0)" onclick="change_page(5)">She</a></li>
+
+        </ul>
+
+
+        <div id="hello-nav-text" style="margin-top: 50px;color: white">
+            <h1>你好，世界。</h1>
+            <br>
+            <p class="lead">Hello, world.</p>
+            <p class="text-uppercase" style="display: inline">Here is the link on github ->  </p><a href="goSource" target="_blank">https://github.com/TreeeLiked/darkme</a>
+            <br>
+            <br>
+            <p style="color: white">
+            Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula.
+
+            Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec ullamcorper nulla non metus auctor fringilla. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla.
+
+            Maecenas sed diam eget risus varius blandit sit amet non magna. Donec id elit non mi porta gravida at eget metus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+            </p>
+            <hr>
+
+            <ul>
+                <li class="lead">文件</li>
+                <li class="lead">便签</li>
+                <!--<li class="lead">好友</li>-->
+                <!--<li class="lead">便签</li>-->
+            </ul>
+
+            <blockquote class="blockquote-reverse">
+                <p>@author lss | treeliked</p>
+            </blockquote>
+        </div>
+        <div>
+            <iframe id="content-main" width="100%" height="600px" frameborder="0" style="margin-top: 30px"></iframe>
+        </div>
+        <!--<div class="page-header">-->
+        <!--<h1 th:text="${username}" style="display: inline"><small th:text="个人中心"></small></h1><h1 style="display: inline"><small>个人中心</small></h1>-->
+        <!--</div>-->
+
+
+    </div>
+</div>
+</body>
+</html>

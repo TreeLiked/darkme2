@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!--禁止缩放-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">-->
+
+    <title>一笔画</title>
+
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bulma.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap/css/bootstrap.min.css}">
+
+    <script type="text/javascript" th:src="@{js/jquery-3.3.1.js}"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+
+    <!--<script th:src="@{https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js}"></script>-->
+    <!--<script defer src="https://use.fontawesome.com/releases/v5.4.1/js/all.js"></script>-->
+    <script defer src="https://use.fontawesome.com/releases/v5.4.1/js/all.js"
+            integrity="sha384-L469/ELG4Bg9sDQbl0hvjMq8pOcqFgkSpwhwnslzvVVGpDjYJ6wJJyYjvG3u8XW7"
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        let currentAjax = null;
+        let calFlag = false;
+        let resetFlag = false;
+        let timeOut = false;
+        let globalDataArr = [];
+        $(function () {
+            $board = $(".board");
+            $col_btn_area = $(".col-btn-area");
+            $("#gen-q").click(function () {
+                $("#bt-reset").click();
+                generateQ();
+            });
+            $("#st-cal").click(function () {
+                stopCurrentAjax();
+                startCal();
+            });
+            $("#help-me").click(function () {
+                showStrokeHelp();
+            });
+            $("#bt-reset").click(function () {
+                $board.empty();
+                $col_btn_area.empty();
+                $("#st-cal").removeClass("is-loading");
+                globalDataArr = [];
+                timeOut = false;
+                resetFlag = true;
+                $(".center-div").css("display", "none");
+                stopCurrentAjax();
+                generateCheckerBoard(false);
+            });
+            $("#row-select").change(function () {
+                resetFlag = true;
+                calFlag = true;
+                generateCheckerBoard(false);
+            });
+            $("#column-select").change(function () {
+                resetFlag = true;
+                calFlag = true;
+                generateCheckerBoard(false);
+            });
+        });
+
+        function generateQ() {
+            let cc = randomNum(6, 11);
+            let rc = randomNum(4, 8);
+            if (rc === 8 && cc === 11) {
+                rc = randomNum(4, 6);
+                cc = randomNum(4, 6);
+            }
+            $("#row-select").val(rc);
+            $("#column-select").val(cc);
+            resetFlag = true;
+            calFlag = true;
+            generateCheckerBoard(true);
+            generateRandomSteps(rc, cc);
+        }
+
+        function generateRandomSteps(rowCount, colCount) {
+            let startX = randomNum(0, rowCount - 1);
+            let startY = randomNum(0, colCount - 1);
+            let $startBlock = getSpecialBlock(startX, startY, true);
+            $startBlock.click();
+            $startBlock.click();
+            let totalSteps = rowCount * colCount - randomNum(4, 7);
+            let curSteps = 1;
+            let curX = startX;
+            let curY = startY;
+            let step = {};
+            step["x"] = startX;
+            step["y"] = startY;
+            globalDataArr.push(step);
+            for (; curSteps < totalSteps;) {
+                if (!getSurroundedState(curX, curY)) {
+                    console.log(globalDataArr);
+                    return;
+                }
+                let nextDir = randomNum(0, 3);
+                switch (nextDir) {
+                    case 0:
+                        curX -= 1;
+                        if (!canGoThis(curX, curY)) {
+                            curX += 1;
+                            continue;
+                        }
+                        break;
+                    case 1:
+                        curY += 1;
+                        if (!canGoThis(curX, curY)) {
+                            curY -= 1;
+                            continue;
+                        }
+                        break;
+                    case 2:
+                        curX += 1;
+                        if (!canGoThis(curX, curY)) {
+                            curX -= 1;
+                            continue;
+                        }
+                        break;
+                    case 3:
+                        curY -= 1;
+                        if (!canGoThis(curX, curY)) {
+                            curY += 1;
+                            continue;
+                        }
+                        break;
+                }
+                let $curBlock = getSpecialBlock(curX, curY, true);
+                $curBlock.click();
+                let step = {};
+                step["x"] = curX;
+                step["y"] = curY;
+                globalDataArr.push(step);
+                curSteps++;
+            }
+            console.log(globalDataArr);
+        }
+
+        function canGoThis(curX, curY) {
+            let $block = getSpecialBlock(curX, curY, true);
+            return !($block === null || $block.attr("data-z") === "1" || $block.attr("data-z") === "2");
+
+        }
+
+        function getSurroundedState(curX, curY) {
+            let flag0 = true;
+            let flag1 = true;
+            let flag2 = true;
+            let flag3 = true;
+            let $upBlock = getSpecialBlock(curX - 1, curY, true);
+            let $rightBlock = getSpecialBlock(curX, curY + 1, true);
+            let $downBlock = getSpecialBlock(curX + 1, curY, true);
+            let $leftBlock = getSpecialBlock(curX, curY - 1, true);
+            if ($upBlock === null || $upBlock.attr("data-z") === "1" || $upBlock.attr("data-z") === "2") {
+                flag0 = false;
+            }
+            if ($rightBlock === null || $rightBlock.attr("data-z") === "1" || $rightBlock.attr("data-z") === "2") {
+                flag1 = false;
+            }
+            if ($downBlock === null || $downBlock.attr("data-z") === "1" || $downBlock.attr("data-z") === "2") {
+                flag2 = false;
+            }
+            if ($leftBlock === null || $leftBlock.attr("data-z") === "1" || $leftBlock.attr("data-z") === "2") {
+                flag3 = false;
+            }
+            return flag0 || flag1 || flag2 || flag3;
+        }
+
+        function stopCurrentAjax() {
+            if (currentAjax !== null && currentAjax) {
+                currentAjax.abort();
+            }
+        }
+
+        function toggleProgressBar() {
+            if (timeOut) {
+                return;
+            }
+            let i = Math.floor(Math.random() * 6);
+            let $pgb = $("#pgb");
+            clearBarColor();
+            switch (i) {
+                case 0:
+                    $pgb.addClass("is-success");
+                    break;
+                case 1:
+                    $pgb.addClass("is-primary");
+                    break;
+                case 2:
+                    $pgb.addClass("is-link");
+                    break;
+                case 3:
+                    $pgb.addClass("is-info");
+                    break;
+                case 4:
+                    $pgb.addClass("is-warning");
+                    break;
+                case 5:
+                    $pgb.addClass("is-danger");
+                    break;
+            }
+            setTimeout(toggleProgressBar, 100);
+        }
+
+        function clearBarColor() {
+            let $pgb = $("#pgb");
+            $pgb.removeClass("is-success");
+            $pgb.removeClass("is-primary");
+            $pgb.removeClass("is-link");
+            $pgb.removeClass("is-info");
+            $pgb.removeClass("is-warning");
+            $pgb.removeClass("is-danger");
+        }
+
+        function startCal() {
+            if (resetFlag === false) {
+                alert("请选择行列或重置后进行计算");
+                return;
+            }
+            if (globalDataArr !== null && globalDataArr.length > 0) {
+                displayAnswer(globalDataArr, true);
+                return;
+            }
+            let flag1 = false;
+            let flag2 = false;
+            let $as = $(".board a");
+            $as.each(function (i, item) {
+                $(item).html("");
+                if ($(item).hasClass("has-background-primary")) {
+                    flag1 = true;
+                }
+                if ($(item).hasClass("has-background-danger")) {
+                    flag2 = true;
+                }
+            });
+            if (!(flag1 && flag2)) {
+                if (!flag1) {
+                    alert("请单击格子以选择需要途径的方块");
+                } else {
+                    alert("请选择起始位置");
+                }
+                return;
+            }
+            timeOut = false;
+            $("#st-cal").addClass("is-loading");
+            $(".center-div").css("display", "block");
+            toggleProgressBar();
+            let row = parseInt($("#row-select").val());
+            let column = parseInt($("#column-select").val());
+            let data = new Array(row - 1);
+            let startX;
+            let startY;
+            $(".board div").each(function (i, item) {
+                let lineArr = new Array(row);
+                let $as = $(item).find("a");
+                $as.each(function (i1, item1) {
+                    let z = $(item1).attr("data-z");
+                    if (parseInt(z) === 2) {
+                        startX = i;
+                        startY = i1;
+                        z = 1;
+                    }
+                    lineArr[i1] = z;
+                });
+                data[i] = lineArr;
+            });
+            let jsonObj = {"startX": startX, "startY": startY, "data": data};
+            let $pgb = $("#pgb");
+            currentAjax = $.post({
+                url: "entertainment/onestroke",
+                data: {
+                    data: JSON.stringify(jsonObj),
+                    token: "-1"
+                },
+                dataType: "json",
+                async: true,
+                cache: false,
+                success: function (data) {
+                    timeOut = false;
+                    $("#st-cal").removeClass("is-loading");
+                    $(".center-div").css("display", "none");
+                    if (data === -1) {
+                        alert("数据格式不正确");
+                        return;
+                    }
+                    if (data === 0) {
+                        alert("无法找到一条路径");
+                        return;
+                    }
+                    displayAnswer(data, false);
+
+                },
+                fail: function (jqXHR, textStatus, errorThrown) {
+                    timeOut = false;
+                    $("#st-cal").removeClass("is-loading");
+                    alert("网络出错");
+                },
+            });
+        }
+
+        function displayAnswer(data, flag) {
+            resetFlag = false;
+            globalDataArr = [];
+            let steps = eval(data);
+            for (let i in steps) {
+                let x = steps[i].x;
+                let y = steps[i].y;
+                let $currBlock = getSpecialBlock(x, y, flag);
+                $currBlock.html(parseInt(i) + 1);
+                if (parseInt(i) !== 0) {
+                    setTimeout(function () {
+                        $currBlock.removeClass("has-background-primary");
+                        $currBlock.addClass("has-background-black");
+                        $currBlock.attr("data-z", 0);
+                    }, (parseInt(i) + 1) * 100);
+                }
+            }
+        }
+
+        function getSpecialBlock(x, y, hasMinusOne) {
+            let $block = null;
+            $(".board a").each(function (i, item) {
+                if (!hasMinusOne) {
+                    if (parseInt($(item).attr("data-x")) === x - 1 && parseInt($(item).attr("data-y")) === y - 1) {
+                        $block = $(item);
+                        return false;
+                    }
+                } else {
+                    if (parseInt($(item).attr("data-x")) === x && parseInt($(item).attr("data-y")) === y) {
+                        $block = $(item);
+                        return false;
+                    }
+                }
+            });
+            return $block;
+        }
+
+        function generateCheckerBoard(autoGen) {
+            //先选择了重置而没进行计算
+            if (!calFlag) {
+                return;
+            }
+            let row = parseInt($("#row-select").val());
+            let column = parseInt($("#column-select").val());
+            $board.empty();
+            $col_btn_area.empty();
+            let widthPer = 100 / column + "%";
+            let widthPxStr = $board.css("width");
+            let widthPxNum = widthPxStr.substring(0, widthPxStr.lastIndexOf("p"));
+            let heightPxNum = parseInt(widthPxNum) / column;
+
+            for (let i = 0; i < row; i++) {
+                let $line = $("<div class='columns'>");
+                $line.css("height", parseInt(heightPxNum + 10) + "px");
+                for (let j = 0; j < column; j++) {
+                    if (!autoGen) {
+                        if (i === 0 && j === 0) {
+                            let $btnCol = $("<a class='button is-rounded is-large is-light btn-col-control'>全部标记</a>");
+                            if (column < 7) {
+                                $btnCol.css("width", widthPxNum / column + "px");
+                            } else if (column < 12) {
+                                $btnCol.css("width", widthPxNum / column * 2 + "px");
+                            } else {
+                                $btnCol.css("width", widthPxNum / column * 3 + "px");
+                            }
+                            $btnCol.on('click', function () {
+                                $(".board a").each(function (i, item) {
+                                    $(item).click();
+                                });
+                                if ($btnCol.text() === "全部标记") {
+                                    $btnCol.text("取消标记全部");
+                                    $btnCol.removeClass("is-light");
+                                    $btnCol.addClass("is-dark");
+                                } else {
+                                    $btnCol.text("全部标记");
+                                    $btnCol.removeClass("is-dark");
+                                    $btnCol.addClass("is-light");
+                                }
+                            });
+                            $col_btn_area.append($btnCol);
+                        }
+                    }
+                    let $block = $("<a class='button block-step has-background-light is-size-3'>");
+                    $block.attr("data-x", i);
+                    $block.attr("data-y", j);
+                    $block.attr("data-z", 0);
+                    $block.css("width", widthPer);
+                    $block.css("height", widthPxNum / column + "px");
+                    $block.on('click', function () {
+                        if ($(this).hasClass("has-background-light")) {
+                            $(this).removeClass("has-background-light");
+                            $(this).addClass("has-background-primary");
+                            $(this).attr("data-z", 1);
+                            return;
+                        }
+                        if ($(this).hasClass("has-background-primary")) {
+                            removeAllRed();
+                            $(this).removeClass("has-background-primary");
+                            $(this).addClass("has-background-danger");
+                            $(this).attr("data-z", 2);
+                            return;
+                        }
+                        if ($(this).hasClass("has-background-danger")) {
+                            $(this).removeClass("has-background-danger");
+                            $(this).addClass("has-background-light");
+                            $(this).attr("data-z", 0);
+                        }
+                    });
+                    $line.append($block);
+                }
+                $board.append($line);
+            }
+        }
+
+        function removeAllRed() {
+            $(".board a").each(function (index, element) {
+                if ($(element).hasClass("has-background-danger")) {
+                    $(element).removeClass("has-background-primary");
+                    $(element).removeClass("has-background-danger");
+                    $(element).addClass("has-background-light");
+                    $(element).attr("data-z", 0);
+                }
+            });
+        }
+
+        function showStrokeHelp() {
+            alert("使用说明：\n"
+                + "\t1、选择您所过一笔画关卡的行数和列数\n" +
+                "\t2、在生成的网格上单击标记需要途径的方块（青色）\n" +
+                "\t\t在已经选择的方块上再次单击标记起始方块（红色）\n" +
+                "\t\t再次单击取消标记此方块（灰色)\n" +
+                "\t\t(点击全部标记快速标记全部，再次点击取消全部)\n" +
+                "\t3、点击开始计算计算结果，格子上的编号即为过关的步骤\n" +
+                "\t4、每次计算后请点击重置按钮进行下一次计算\n\n" +
+                "有任何问题或建议请联系 1172714116@qq.com\n");
+        }
+
+        function randomNum(minNum, maxNum) {
+            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+        }
+    </script>
+</head>
+<body>
+<div class="container main-div">
+
+    <div class="tile is-parent is-vertical no-padding" style="width: 100%">
+        <article class="tile is-child notification is-primary">
+            <p class="title">自动帮我一笔画</p>
+            <p class="subtitle">仅供娱乐</p>
+            <p class="subtitle">@author lss</p>
+        </article>
+    </div>
+    <div class="center-div" style="display: none; width: 60%; margin-bottom: 15px">
+        <div>
+            <progress id="pgb" class="progress" value="100" max="100"></progress>
+        </div>
+        <div>
+
+            <article class="message is-primary">
+                <div class="message-header">
+                    <p>@zxc</p>
+                    <button class="delete" aria-label="delete"></button>
+                </div>
+                <div class="message-body">
+                    正在计算，请稍后...如果图像较为复杂，时间可能会大于1分钟，两分钟自动超时取消计算
+                </div>
+            </article>
+        </div>
+
+    </div>
+
+    <div class="columns has-background-light is-marginless">
+        <div class="column is-2 is-size-5 has-text-primary has-text-right">请输入行数 - ></div>
+        <div class="column is-2">
+            <div class="field">
+                <div class="control">
+                    <div class="select is-primary">
+                        <label>
+                            <select id="row-select">
+                                <option selected="selected">1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                                <option>9</option>
+                                <option>10</option>
+                                <option>11</option>
+                                <option>12</option>
+                                <option>13</option>
+                                <option>14</option>
+                                <option>15</option>
+                                <option>16</option>
+                                <option>17</option>
+                                <option>18</option>
+                                <option>19</option>
+                                <option>20</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="column is-1 has-text-centered">
+            <a class="button is-primary" id="gen-q">
+                <span class="icon">
+                    <i class="fa fa-pencil-alt"></i>
+                </span>
+                <span>帮我出题</span>
+            </a>
+        </div>
+        <div class="column is-1 has-text-centered">
+            <a class="button is-success" id="st-cal">
+                <span class="icon">
+                    <i class="fa fa-signature"></i>
+                </span>
+                <span>开始计算</span>
+            </a>
+        </div>
+
+
+        <div class="column is-1 has-text-centered">
+            <a class="button is-danger" id="bt-reset">
+                <span class="icon">
+                    <i class="fa fa-redo"></i>
+                </span>
+                <span>全部重置</span>
+            </a>
+        </div>
+
+        <div class="column is-1 has-text-centered">
+            <a class="button is-info" id="help-me">
+                <span class="icon">
+                    <i class="fa fa-info"></i>
+                </span>
+                <span>查看帮助</span>
+            </a>
+        </div>
+
+        <div class="column is-2">
+            <div class="field">
+                <div class="control">
+                    <div class="select is-primary level-right">
+                        <label>
+                            <select id="column-select">
+                                <option selected="selected">1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                                <option>9</option>
+                                <option>10</option>
+                                <option>11</option>
+                                <option>12</option>
+                                <option>13</option>
+                                <option>14</option>
+                                <option>15</option>
+                                <option>16</option>
+                                <option>17</option>
+                                <option>18</option>
+                                <option>19</option>
+                                <option>20</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column is-2 is-size-5 has-text-primary has-text-left"> < - 请输入列数</div>
+    </div>
+
+    <div class="col-btn-area"></div>
+
+    <div style="margin-top: 40px">
+        <!--<div class="row-btn-area"></div>-->
+        <div class="board"></div>
+    </div>
+    <hr>
+    <footer class="footer my-footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>@author</strong> <a href="https://ineffable.page">lss</a>
+            </p>
+        </div>
+    </footer>
+
+</div>
+</body>
+<style type="text/css">
+
+    .main-div {
+        position: relative;
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .no-padding {
+        padding: 0;
+    }
+
+    .col-btn-area {
+        margin-top: 40px;
+        width: 52%;
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+
+    }
+
+    .board {
+        width: 50%;
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .block-step {
+        margin: 5px;
+        color: #fff;
+    }
+
+    .btn-col-control {
+        margin: 2px;
+    }
+
+    .center-div {
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .my-footer {
+        position: fixed;
+        padding-top: 10px;
+        padding-bottom: 0px;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
+</html>

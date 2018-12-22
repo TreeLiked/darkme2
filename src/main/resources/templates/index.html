@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <title>给你的情书</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="baidu-site-verification" content="79bZQUEI5o"/>
+
+    <link th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/stars.css}">
+    <script type="text/javascript" th:src="@{/js/jquery-3.3.1.js}"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/js.cookie.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.session.js}"></script>
+    <script type="text/javascript" th:src="@{/js/onload.js}"></script>
+    <script type="text/javascript" th:src="@{/js/mod_style.js}"></script>
+    <script type="text/javascript" th:src="@{/js/utils.js}"></script>
+    <script type="text/javascript" th:src="@{/js/up_down.js}"></script>
+    <script type="text/javascript" th:src="@{/js/do_drop.js}"></script>
+    <script type="text/javascript" th:src="@{/js/clipboard.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/cos_js_sdk_v5.js}"></script>
+    <script type="text/javascript" th:src="@{/js/friend.js}"></script>
+    <!--<script type="text/javascript" th:src="@{/js/prefixfree.min.js}"></script>-->
+    <script type="text/javascript" th:src="@{/js/lr.js}"></script>
+    <script type="text/javascript" th:src="@{/js/action.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.zclip.js}"></script>
+    <script type="text/javascript" th:src="@{/js/handoff.js}"></script>
+
+    <script type="text/javascript">
+        // 禁止鼠标右键
+        document.oncontextmenu = function () {
+            return false;
+        };
+        //禁止元素被选中
+        if (typeof (document.onselectstart) !== 'undefined') {
+            // IE chrome下禁止元素被选中
+            document.onselectstart = function () {
+                return false;
+            }
+        } else {
+            // firefox下禁止元素被选中的变通办法
+            document.write('<style type="text/css">body { -moz-user-select: none; }</style>');
+        }
+
+    </script>
+
+</head>
+<body>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"
+                                                                                                  data-whatever="">&times;</span>
+                </button>
+                <!--New Message To：这里可以写东西-->
+                <h4 class="modal-title" id="exampleModalLabel">[指定人]</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="file-destination" class="control-label">您可以指定人下载</label>
+                        <div class="input-group has-feedback" id="file-destination">
+                            <span class="input-group-addon" id="basic-addon1">@</span>
+                            <input type="text" class="form-control file-upload-destination"
+                                   placeholder="不指定默认所有拥有文件编号的人都可以下载此文件" aria-describedby="basic-addon1">
+                            <span class="glyphicon form-control-feedback file-upload-dest-valid-icon"
+                                  aria-hidden="true"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message-text" class="control-label">备注信息</label>
+                        <textarea class="form-control file-upload-attach" id="message-text"
+                                  placeholder="下载此文件时此内容将会被显示"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger file-up-load-modal-close" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-info start-file-upload" style="margin-left: 26px">开始上传</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container-fluid" style="padding: 0">
+
+    <nav class="navbar navbar-default navbar-fixed-top navbar-has-shadow" style="background: whitesmoke">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
+                        <!--data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
+                    <!--<span class="sr-only">Toggle navigation</span>-->
+                    <!--<span class="icon-bar"></span>-->
+                    <!--<span class="icon-bar"></span>-->
+                    <!--<span class="icon-bar"></span>-->
+                <!--</button>-->
+                <a class="navbar-brand" href="#" onclick="makeEgg()">
+                    <!--<span class="brand_icon ico"></span>-->
+                    <!--<span class="brand_icon glyphicon glyphicon-grain"></span>-->
+                    <!--<img src="/static/pic.png">-->
+
+                    <img th:src="@{/pic.png}" style="width: 20px; height: 20px;">
+                    <script type="text/javascript">
+                        function makeEgg() {
+                            alert("点我干啥");
+                        }
+                    </script>
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a role="button" style="background-color: whitesmoke">首页<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li><a role="button" onclick="showIntro()">简介</a></li>
+                    <!--<li class="dropdown">-->
+                    <!--<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
+                    <!--aria-expanded="false">F&C<span class="caret"></span></a>-->
+                    <!--<ul class="dropdown-menu">-->
+                    <!--<li><a role="button">Hadoop</a></li>-->
+                    <!--<li role="separator" class="divider"></li>-->
+                    <!--<li><a role="button">SpringCloud</a></li>-->
+                    <!--</ul>-->
+                    <!--</li>-->
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">文件<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li id="up_file_li"><a role="button" id="up_file_a" onclick="selectFile()">文件上传</a></li>
+                            <li role="separator" class="divider"></li>
+
+                            <li id="dw_file_li"><a role="button"
+                                                   onclick="showBannerInfo('alert-info', 0, '在导航栏搜索框中输入文件编号点击搜索即可', 3000, 1000, true)">文件提取</a>
+                            </li>
+                            <!--<li><a role="button" onclick="selectFile()">文件打印</a></li>-->
+
+                            <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>-->
+                            <li hidden="hidden"><a href="#1" class="file_up_modal" data-toggle="modal"
+                                                   data-target="#exampleModal"></a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">连续互通<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li id="handoff_fetch_li"><a role="button" id="handoff_fetch_a">获取文本 /Fetch</a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+
+                            <!--<li hidden="hidden"><a href="#1" class="file_up_modal" data-toggle="modal"-->
+                            <!--data-target="#exampleModal"></a></li>-->
+                            <li id="handoff_post_li"><a role="button" id="handoff_post_a">推送文本 /Post</a>
+                            </li>
+
+                            <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>-->
+
+                        </ul>
+                    </li>
+
+                </ul>
+
+                <form class="navbar-form navbar-left">
+                    <!--<div class="form-group">-->
+                    <!--<input type="text" class="form-control search-box" placeholder="Search">-->
+                    <!--&lt;!&ndash;多加一个input禁止默认的回车提交表单&ndash;&gt;-->
+                    <!--</div>-->
+                    <!--<button type="button"  class="btn btn-default search-btn">搜索</button>-->
+                    <div class="input-group">
+                        <input type="text" class="form-control search-box" placeholder="Search for...">
+                        <input style="display:none">
+                        <span class="input-group-btn">
+                             <button class="btn btn-default search-btn" type="button"
+                                     onsubmit="return false;">搜索</button>
+                        </span>
+                    </div>
+                </form>
+
+                <ul class="nav navbar-nav" style="width: 600px; height: 50px">
+                    <li style="width: 100%">
+                        <div class="progress" style="margin-top: 15px; width: 100%;" hidden="hidden">
+                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar"
+                                 aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0">
+                                <!--<span class="sr-only">45% Complete</span>-->
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li class="dropdown">
+                        <a id="personal-center" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                           aria-haspopup="true" aria-expanded="false">个人中心<span class="caret"></span></a>
+
+                        <ul class="dropdown-menu">
+                            <li id="li-login"><a role="button" onclick="showLRHeader(1)">登录</a></li>
+                            <li id="li-personal-center" style="display: none"><a role="button"
+                                                                                 onclick="goPersonalCenter()"
+                                                                                 id="into-personal-center">进入个人中心</a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li id="li-register"><a role="button" onclick="showLRHeader(0)">注册</a></li>
+                            <li id="li-login-out" style="display: none"><a role="button" onclick="login_out()">注销登录</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">其他<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a role="button" onclick="showHelp()">帮助</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a role="button" onclick="showAuthor()">关于</a></li>
+                            <script type="text/javascript">
+                                function showHelp() {
+                                    $(".btn-show-help").click();
+                                }
+
+                                function showAuthor() {
+                                    alert("如有您有任何问题或者建议，可以发送邮件至：  \n\n\t1172714116@qq.com | im.lqs2@icloud.com \n\n或者添加\n\n\tQQ: 1172714116 \t微信: Xia03090709\n\n与我联系, 感谢您的使用。");
+                                }
+                            </script>
+                            <!--<li><a role="button">Another action</a></li>-->
+                            <!--<li><a role="button">Something else here</a></li>-->
+                            <!--<li role="separator" class="divider"></li>-->
+                            <!--<li><a role="button">Separated link</a></li>-->
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="jumbotron d_title" style="display: none">
+        <h1>一身诗意千寻瀑</h1>
+        <p>
+            这里是简介，但是我还没想好，就先放着吧
+        </p>
+        <p><a class="btn btn-primary btn-lg" role="button">告诉我你的创意</a></p>
+    </div>
+
+    <div class="lr_div_container" style="color: white">
+        <div class="lr_div_middle" style="display: none"></div>
+
+        <div class="login_div" style="display: none">
+            <div class="pull-right" style="margin-right: 80px">
+                <button class="btn btn-info" onclick="slideUpL()">&nbsp;收&nbsp;起&nbsp;</button>
+            </div>
+            <div class="page-header" style="margin-left: 50px">
+                <h1>登录^
+                    <small style="color: white">darkme.cn</small>
+                </h1>
+            </div>
+
+            <div style="width: 30%; margin: 0 0 20px 100px">
+                <form>
+                    <div class="form-group">
+                        <label for="l_InputUserName">用户名</label>
+                        <input type="text" class="form-control l-un" id="l_InputUserName" placeholder="用户名/邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label for="l_InputPassword1">密码</label>
+                        <input type="password" class="form-control l-up" id="l_InputPassword1" placeholder="还记得密码么">
+                    </div>
+                    <!--<div class="form-group">-->
+                    <!--<label for="exampleInputFile">File input</label>-->
+                    <!--<input type="file" id="exampleInputFile">-->
+                    <!--<p class="help-block">Example block-level help text here.</p>-->
+                    <!--</div>-->
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" class="l-ur">在15天内记住我好吗
+                        </label>
+                    </div>
+                    <button type="button" onsubmit="return false;" class="btn btn-primary l-btn">&emsp;登&emsp;录&emsp;
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="register_div" style="display: none">
+
+            <div class="pull-right" style="margin-right: 80px">
+                <button class="btn btn-info" onclick="slideUpR()">&nbsp;收&nbsp;起&nbsp;</button>
+            </div>
+            <div class="page-header" style="margin-left: 50px">
+                <h1>注册^
+                    <small style="color: white">darkme.cn</small>
+                </h1>
+            </div>
+
+            <div style="width: 30%; margin: 0 0 20px 100px">
+                <form>
+                    <div class="form-group has-feedback r-un-div">
+                        <label for="r_InputUserName">用户名</label>
+                        <input type="text" class="form-control r-un" id="r_InputUserName"
+                               placeholder="长度2-16个字符 (@符号禁止使用)">
+                        <span class="glyphicon form-control-feedback r-un-s" aria-hidden="true"></span>
+                    </div>
+                    <div class="form-group has-feedback r-up-div">
+                        <label for="r_InputPassword1">密码</label>
+                        <input type="password" class="form-control r-up" id="r_InputPassword1"
+                               placeholder="长度6-16位">
+                        <span class="glyphicon form-control-feedback r-up-s" aria-hidden="true"></span>
+                    </div>
+                    <div class="form-group has-feedback r-ue-div">
+                        <label for="exampleInputEmail1">邮箱</label>
+                        <input type="email" class="form-control r-ue" id="exampleInputEmail1"
+                               placeholder="[可选]可用于登录/找回密码，若留空请牢记您的用户名和密码">
+                        <span class="glyphicon form-control-feedback r-ue-s" aria-hidden="true"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="radio-inline">
+                            <input type="radio" name="r-sex-radio-group" id="r-sex-radio-0" value="0" checked="checked">男</label>
+                        <label class="radio-inline">
+                            <input type="radio" name="r-sex-radio-group" id="r-sex-radio-1" value="1"> 女
+                        </label>
+                    </div>
+                    <button type="button" onsubmit="return false;" class="btn btn-default r-btn">&emsp;注&emsp;册&emsp;
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div>
+
+        <button type="button" class="btn btn-primary btn-lg btn-show-help" data-toggle="modal" data-target="#myModal"
+                style="display: none"></button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">帮助</h4>
+                    </div>
+                    <div class="modal-body well-large">
+                        <p class="lead">
+                        <ul>
+                            <li>文件功能
+                                <ul>
+                                    <li>未登录可用作文件中转，文件编号有效期：1（单位：天）</li>
+                                    <li>登录后文件长期保存，有效期：>10（单位：年）</li>
+                                </ul>
+                            </li>
+                            <li>便签
+                                <ul>
+                                    <li>登录后使用，永久保存</li>
+                                    <li>使用细节：无</li>
+                                </ul>
+                            </li>
+                            <li>好友
+                                <ul>
+                                    <li>发消息，加好友，传文件</li>
+                                </ul>
+                            </li>
+                            <li>消息
+                                <ul>
+                                    <li>简单消息的发送与接收</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <!--<button type="button" class="btn btn-primary">Save changes</button>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main">
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+
+            <div class="middle-info-div"></div>
+
+            <div>
+                <div style="display: none">
+                    <input type="file" id="file" class="file" onchange="upload_file_attachment()"
+                           style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;"/>
+                    <p id="handoff_text_input" style="display: none"></p>
+                    <button class="btn_copy" data-clipboard-target="#handoff_text_input" style="display: none"></button>
+                </div>
+
+            </div>
+
+
+            <div class="right_info_area"></div>
+
+
+            <div id="frame-div-container" style="color: black; display: none">
+                <div class="pull-left">
+                    <h1 style="color: #fff;">个人中心
+                        <small><em class="self" style="color: #fff;">darkme.cn</em></small>
+                    </h1>
+                </div>
+                <br>
+                <!--<h1 class="personal-center-title">Dark<small>个人中心</small></h1>-->
+                <hr style="border: 0.1vh solid #D5D5D5; width: 100%">
+
+                <iframe id="middle-frame" width="100%" height="100%" th:allowtransparency="true" frameborder="0"
+                        style="display:none" onload="this.style.display = 'block';" src="/hello"></iframe>
+                <!--</div>-->
+                <!--</div>-->
+            </div>
+
+        </div>
+        <div class="footer">
+            <div class="foot text-center" onclick="showEgg()">&copy;2018-2019 LSS All Rights Reserved. 苏ICP备 18036117号-1
+            </div>
+            <script type="text/javascript">
+                function showEgg() {
+                    alert("zzz...");
+                }
+            </script>
+        </div>
+        <!--<div class="foot center-block">&copy;2017-2018 LS2.All Rights Reserved.</div>-->
+    </div>
+</div>
+
+</body>
+</html>
