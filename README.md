@@ -16,6 +16,10 @@
 
 - 登录后上传文件将会长期存储，可以作为网盘使用，同样可以作为文件中转（带四位可下载编号）；
 
+- 截图
+
+  ![](https://ws2.sinaimg.cn/large/006tNbRwgy1fyfsf7hq93j32010u0n6u.jpg)
+
 ###### 便签
 
 > 登录后使用
@@ -34,12 +38,21 @@
 
 - 便签的删除
 
+- 截图
+
+  ![](https://ws2.sinaimg.cn/large/006tNbRwgy1fyfsfvg8dtj32010u0wno.jpg)
+
 
 
 ###### 小游戏的破解
 
 - 一笔画游戏的自动路径寻找
 
-  > [点我前往](https://darkme.cn/stroke)
+  > 请耐心等待网页加载完成后使用！！！[点我前往](htttps://darkme.cn/stroke)
+
+  - 功能截图
+
+    ![](https://ws3.sinaimg.cn/large/006tNbRwgy1fyfsdv7c2vj31fa0u0gmk.jpg)
+
 
 
