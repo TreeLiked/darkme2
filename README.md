@@ -40,6 +40,6 @@
 
 - 一笔画游戏的自动路径寻找
 
-  > [点我前往](htttps://darkme.cn/stroke)
+  > [点我前往](https://darkme.cn/stroke)
 
 
