@@ -18,6 +18,7 @@
 
 - 截图
 
+
   ![](https://ws2.sinaimg.cn/large/006tNbRwgy1fyfsf7hq93j32010u0n6u.jpg)
 
 ###### 便签
@@ -51,7 +52,7 @@
   > 请耐心等待网页加载完成后使用！！！[点我前往](htttps://darkme.cn/stroke)
 
   - 功能截图
-
+    ![](https://ws2.sinaimg.cn/large/006tNbRwgy1fygs7b0vq8j31g20u0753.jpg)
     ![](https://ws3.sinaimg.cn/large/006tNbRwgy1fyfsdv7c2vj31fa0u0gmk.jpg)
 
 
