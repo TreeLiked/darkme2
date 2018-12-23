@@ -4,10 +4,11 @@ import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
-import com.qcloud.cos.model.COSObject;
-import com.qcloud.cos.model.COSObjectInputStream;
-import com.qcloud.cos.model.GetObjectRequest;
+import com.qcloud.cos.http.HttpMethodName;
+import com.qcloud.cos.model.GeneratePresignedUrlRequest;
+import com.qcloud.cos.model.ResponseHeaderOverrides;
 import com.qcloud.cos.region.Region;
+import com.qcloud.cos.utils.DateUtils;
 import com.treeliked.darkme2.constant.CosConstant;
 import com.treeliked.darkme2.constant.FileStorageConstant;
 import com.treeliked.darkme2.constant.SessionConstant;
@@ -18,16 +19,16 @@ import com.treeliked.darkme2.service.FileService;
 import com.treeliked.darkme2.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.net.URL;
+import java.util.Date;
 
 /**
  * file control
@@ -98,7 +99,6 @@ public class FileController {
             record.setFilePostAuthor(filePostAuthor);
             record.setFileSaveDays(FileStorageConstant.FILE_SAVE_LONG_TIME);
         }
-        log.info("...{}", record);
 
         int i = fileService.insertFileRecord(record);
         if (i != 1) {
@@ -140,25 +140,34 @@ public class FileController {
     public void downloadFile(@RequestParam("id") String id,
                              HttpServletRequest request,
                              HttpServletResponse response) throws Exception {
-        File file = fileService.getFileByFileId(id);
 
+        File file = fileService.getFileByFileId(id);
         ServletContext context = request.getServletContext();
         String mimeType = context.getMimeType(file.getFileName());
-        response.setContentType(mimeType);
-
-        // 设置下载的头信息
-        DownloadUtils.setFileDownloadHeader(response, file.getFileName());
-        response.setCharacterEncoding("utf-8");
-
-        // 获取bucket
+        System.out.println(mimeType);
         String bucketName = file.getFileSaveDays() > FileStorageConstant.FILE_SAVE_SHORT_TIME ? CosConstant.BUCKET_NAME60 : CosConstant.BUCKET_NAME1;
+        // key in bucket
+        String key = file.getFileBucketId();
+        GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucketName, key, HttpMethodName.GET);
 
-        GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, file.getFileBucketId());
-        COSObject cosObject = getClient().getObject(getObjectRequest);
-        COSObjectInputStream ips = cosObject.getObjectContent();
+        //设置下载时返回的 http 头
+        ResponseHeaderOverrides responseHeaders = new ResponseHeaderOverrides();
 
-        ServletOutputStream ops = response.getOutputStream();
-        IOUtils.copy(ips, ops);
+        String responseContentLanguage = "zh-CN";
+        String responseCacheControl = "no-cache";
+        String cacheExpireStr = DateUtils.formatRFC822Date(new Date(System.currentTimeMillis() + 24L * 3600L * 1000L));
+        responseHeaders.setContentType(mimeType);
+        responseHeaders.setContentLanguage(responseContentLanguage);
+        responseHeaders.setContentDisposition(DownloadUtils.getFileDownloadHeaderStr(file.getFileName()));
+        responseHeaders.setCacheControl(responseCacheControl);
+        responseHeaders.setExpires(cacheExpireStr);
+        req.setResponseHeaders(responseHeaders);
+        // 设置签名在半个小时后过期，默认5分钟
+        Date expirationDate = new Date(System.currentTimeMillis() + 30L * 60L * 1000L);
+        req.setExpiration(expirationDate);
+        URL url = getClient().generatePresignedUrl(req);
+        // 打开新窗口下载文件
+        response.getWriter().write("<script>window.open('" + url + "');</script>");
     }
 
 
@@ -170,7 +179,6 @@ public class FileController {
         File file = fileService.getFileByFileId(id);
 
         String username = (String) session.getAttribute(SessionConstant.KEY_OF_USER_NAME);
-
 
         if (!username.equals(file.getFilePostAuthor())) {
             resp.setCode(ResultCode.FAIL);

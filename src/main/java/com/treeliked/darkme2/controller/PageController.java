@@ -90,7 +90,7 @@ public class PageController {
 
     @RequestMapping("goSource")
     public void goGit(HttpServletResponse response) throws IOException {
-        response.sendRedirect("https://github.com/TreeLiked/darkme.git");
+        response.sendRedirect("https://github.com/TreeLiked/darkme2");
     }
 
     @RequestMapping("stroke")

@@ -5,6 +5,9 @@ $(function () {
     Region = "ap-shanghai";
 
 
+    $("#go_stroke").click(function () {
+        window.open("https://darkme.cn/stroke");
+    });
     $(".search-btn").click(function () {
         chooseSearchWhat();
     });

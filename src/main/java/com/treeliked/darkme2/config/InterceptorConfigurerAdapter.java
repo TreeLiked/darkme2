@@ -22,7 +22,7 @@ public class InterceptorConfigurerAdapter implements WebMvcConfigurer {
 
         // 对 file & memo api操作拦截进行session验证
         registry.addInterceptor(new ApiInterceptor()).addPathPatterns(new ArrayList<String>() {{
-            add("/api/file/**");
+            add("/api/file/rmFile");
             add("/api/memo/**");
         }});
     }

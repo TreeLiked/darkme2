@@ -57,10 +57,20 @@ public class DownloadUtils {
      * @param filename 文件名
      */
     public static void setFileDownloadHeader(HttpServletResponse response, String filename) {
+        response.setHeader("Content-Disposition", getFileDownloadHeaderStr(filename));
+    }
+
+    /**
+     * 获取响应头的str，解决中文乱码
+     *
+     * @param filename 文件名
+     * @return str
+     */
+    public static String getFileDownloadHeaderStr(String filename) {
         String headerValue = "attachment;";
         headerValue += " filename=\"" + encodeURIComponent(filename) + "\";";
         headerValue += " filename*=utf-8''" + encodeURIComponent(filename);
-        response.setHeader("Content-Disposition", headerValue);
+        return headerValue;
     }
 
     /**

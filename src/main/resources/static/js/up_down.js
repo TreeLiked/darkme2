@@ -25,7 +25,6 @@ function uploadFile(atta, destination) {
             let bucketId = resp.data1;
             if (resp.code === "SUCCESS") {
 
-
                 let $info_area = $(".right_info_area");
                 let $onProgressAlert = createAlertDiv("alert-info", "正在上传文件: " + file.name, true, true);
                 $info_area.append($onProgressAlert);
@@ -33,6 +32,8 @@ function uploadFile(atta, destination) {
 
                 let $bar_parent = $(".progress");
                 $bar_parent.show();
+
+
                 let $bar_parent_width = $bar_parent.width();
 
                 let $bar = $(".progress-bar");
