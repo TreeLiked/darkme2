@@ -29,10 +29,10 @@ public interface UserMapper {
      * @mbg.generated Tue Dec 18 18:09:49 CST 2018
      */
     @Insert({
-            "insert into user (id, username, ",
+            "insert into user (id, name, ",
             "password, email, ",
             "is_man, create_time)",
-            "values (#{id,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, ",
+            "values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
             "#{password,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, ",
             "#{isMan,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP})"
     })
@@ -46,13 +46,13 @@ public interface UserMapper {
      */
     @Select({
             "select",
-            "id, username, password, email, is_man, create_time",
+            "id, name, password, email, is_man, create_time",
             "from user",
             "where id = #{id,jdbcType=VARCHAR}"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR, id = true),
-            @Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
             @Result(column = "password", property = "password", jdbcType = JdbcType.VARCHAR),
             @Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
             @Result(column = "is_man", property = "isMan", jdbcType = JdbcType.BIT),
@@ -71,19 +71,19 @@ public interface UserMapper {
      */
     @Select({
             "select",
-            "id, username, password, email, is_man, create_time",
+            "id, name, password, email, is_man, create_time",
             "from user",
-            "where username = #{username,jdbcType=VARCHAR} and password = #{password,jdbcType=VARCHAR}"
+            "where name = #{name,jdbcType=VARCHAR} and password = #{password,jdbcType=VARCHAR}"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR, id = true),
-            @Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
             @Result(column = "password", property = "password", jdbcType = JdbcType.VARCHAR),
             @Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
             @Result(column = "is_man", property = "isMan", jdbcType = JdbcType.BIT),
             @Result(column = "create_time", property = "createTime", jdbcType = JdbcType.TIMESTAMP)
     })
-    User hasMatchUser1(@Param("username") String username, @Param("password") String password) throws Exception;
+    User hasMatchUser1(@Param("name") String username, @Param("password") String password) throws Exception;
 
     /**
      * 是否存在此用户
@@ -95,13 +95,13 @@ public interface UserMapper {
      */
     @Select({
             "select",
-            "id, username, password, email, is_man, create_time",
+            "id, name, password, email, is_man, create_time",
             "from user",
             "where email = #{email,jdbcType=VARCHAR} and password = #{password,jdbcType=VARCHAR}"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR, id = true),
-            @Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
             @Result(column = "password", property = "password", jdbcType = JdbcType.VARCHAR),
             @Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
             @Result(column = "is_man", property = "isMan", jdbcType = JdbcType.BIT),
@@ -117,8 +117,8 @@ public interface UserMapper {
      * @return >1则存在用户
      * @throws Exception 抛出所有异常
      */
-    @Select("select count(*) from user where binary username = #{username}")
-    Integer hasMatcherUsername1(@Param("username") String name) throws Exception;
+    @Select("select count(*) from user where binary name = #{name}")
+    Integer hasMatcherUsername1(@Param("name") String name) throws Exception;
 
     /**
      * 查询是否存在此用户
@@ -138,12 +138,12 @@ public interface UserMapper {
      */
     @Select({
             "select",
-            "id, username, password, email, is_man, create_time",
+            "id, name, password, email, is_man, create_time",
             "from user"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR, id = true),
-            @Result(column = "username", property = "username", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
             @Result(column = "password", property = "password", jdbcType = JdbcType.VARCHAR),
             @Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
             @Result(column = "is_man", property = "isMan", jdbcType = JdbcType.BIT),
@@ -159,7 +159,7 @@ public interface UserMapper {
      */
     @Update({
             "update user",
-            "set username = #{username,jdbcType=VARCHAR},",
+            "set name = #{name,jdbcType=VARCHAR},",
             "password = #{password,jdbcType=VARCHAR},",
             "email = #{email,jdbcType=VARCHAR},",
             "is_man = #{isMan,jdbcType=BIT},",

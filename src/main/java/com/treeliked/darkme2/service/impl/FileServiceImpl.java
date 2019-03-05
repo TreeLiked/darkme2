@@ -56,4 +56,9 @@ public class FileServiceImpl implements FileService {
     public int deleteFile(String id) throws Exception {
         return fileMapper.deleteByPrimaryKey(id);
     }
+
+    @Override
+    public List<File> getPublicFile() {
+        return fileMapper.selectByPublic();
+    }
 }

@@ -168,7 +168,7 @@ public interface FileMapper {
             "id, file_name, file_size, file_bring_id, file_bucket_id, file_save_days, file_attach, ",
             "file_post_author, file_destination, file_post_date",
             "from file",
-            "where file_post_author = #{username,jdbcType=VARCHAR} or file_destination = #{username,jdbcType=VARCHAR} order by file_post_date desc"
+            "where file_post_author = #{name,jdbcType=VARCHAR} or file_destination = #{name,jdbcType=VARCHAR} order by file_post_date desc"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.VARCHAR, id = true),
@@ -182,5 +182,8 @@ public interface FileMapper {
             @Result(column = "file_destination", property = "fileDestination", jdbcType = JdbcType.VARCHAR),
             @Result(column = "file_post_date", property = "filePostDate", jdbcType = JdbcType.TIMESTAMP)
     })
-    List<File> getFileByUser(@Param("username") String username) throws Exception;
+    List<File> getFileByUser(@Param("name") String username) throws Exception;
+
+
+    List<File> selectByPublic();
 }

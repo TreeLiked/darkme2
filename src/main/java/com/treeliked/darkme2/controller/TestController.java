@@ -66,16 +66,20 @@ public class TestController {
         System.out.println(session1);
         System.out.println(session == session1);
 
-        System.out.println("------------");
         ServletContext sc1 = session.getServletContext();
         ServletContext sc2 = request.getServletContext();
         System.out.println(sc1);
         System.out.println(sc2);
         System.out.println(sc1 == sc2);
         return true;
-
     }
 
+
+    @RequestMapping("/testx")
+    public void testX(HttpServletRequest request) {
+        System.out.println(request.getRequestURL().toString());
+        System.out.println(request.getRequestURI());
+    }
 
 }
 

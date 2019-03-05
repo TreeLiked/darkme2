@@ -1,6 +1,10 @@
 
 
-$(document).bind("ajaxError", function(xhr){
+$(document).bind("ajaxError", function(event, xhr, options, exc){
+    console.log(event);
+    console.log(xhr);
+    console.log(options);
+    console.log(exc);
     showBannerInfo("alert-warning", 0, "服务开小差咯～", 4000,1000,true);
 });
 

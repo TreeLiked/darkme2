@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="mysqlTables" targetRuntime="MyBatis3Simple">
+        <!--jdbc的数据库连接 -->
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="${url}"
+                        userId="${userId}"
+                        password="${password}">
+        </jdbcConnection>
+
+        <!-- Model模型生成器,用来生成含有主键key的类，记录类 以及查询Example类
+            targetPackage     指定生成的model生成所在的包名
+            targetProject     指定在该项目下所在的路径
+        -->
+        <javaModelGenerator targetPackage="dataobject"
+                            targetProject="${package}">
+            <!-- 是否对model添加 构造函数 -->
+            <!--<property name="constructorBased" value="true"/>-->
+            <!-- 是否允许子包，即targetPackage.schemaName.tableName -->
+            <property name="enableSubPackages" value="false"/>
+            <!-- 建立的Model对象是否 不可改变  即生成的Model对象不会有 setter方法，只有构造方法 -->
+            <!--<property name="immutable" value="true"/>-->
+            <!-- 给Model添加一个父类 -->
+            <!--<property name="rootClass" value="com.foo.louis.Hello"/>-->
+            <!-- 是否对类CHAR类型的列的数据进行trim操作 -->
+            <!--<property name="trimStrings" value="true"/>-->
+        </javaModelGenerator>
+
+        <!--Mapper映射文件生成所在的目录 为每一个数据库的表生成对应的SqlMap文件 -->
+        <sqlMapGenerator targetPackage="dao"
+                         targetProject="${package}">
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+        <!-- 客户端代码，生成易于使用的针对Model对象和XML配置文件 的代码
+                type="ANNOTATEDMAPPER",生成Java Model 和基于注解的Mapper对象
+                type="MIXEDMAPPER",生成基于注解的Java Model 和相应的Mapper对象
+                type="XMLMAPPER",生成SQLMap XML文件和独立的Mapper接口
+        -->
+        <javaClientGenerator targetPackage="dao"
+                             targetProject="${package}"
+                             type="ANNOTATEDMAPPER">
+            <!--<property name="enableSubPackages" value=""/>-->
+
+        </javaClientGenerator>
+
+        <table tableName="${tableName0}"/>
+        <table tableName="${tableName1}"/>
+        <table tableName="${tableName2}"/>
+        <table tableName="${tableName3}"/>
+        <table tableName="${tableName4}"/>
+        <table tableName="${tableName5}"/>
+        <table tableName="${tableName6}"/>
+        <table tableName="${tableName7}"/>
+        <table tableName="${tableName8}"/>
+        <table tableName="${tableName9}"/>
+    </context>
+</generatorConfiguration>

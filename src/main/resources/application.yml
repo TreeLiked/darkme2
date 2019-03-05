@@ -41,3 +41,10 @@ cos:
     name:
       b1: public1-1253931949
       b60: public60-1253931949
+
+
+my:
+  mybatis:
+    gen-dir: /Users/lqs2/Desktop/mybatis/gen/
+    zip-dir: /Users/lqs2/Desktop/mybatis/zip/
+    map-dir: file:/Users/lqs2/Desktop/mybatis/zip/

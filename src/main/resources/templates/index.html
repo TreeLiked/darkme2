@@ -24,6 +24,7 @@
     <script type="text/javascript" th:src="@{/js/clipboard.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/cos_js_sdk_v5.js}"></script>
     <script type="text/javascript" th:src="@{/js/friend.js}"></script>
+    <script type="text/javascript" th:src="@{/js/tools.js}"></script>
     <!--<script type="text/javascript" th:src="@{/js/prefixfree.min.js}"></script>-->
     <script type="text/javascript" th:src="@{/js/lr.js}"></script>
     <script type="text/javascript" th:src="@{/js/action.js}"></script>
@@ -89,6 +90,119 @@
 </div>
 
 
+<div class="modal fade bs-example-modal-lg" id="public-file-modal" tabindex="-1" role="dialog" aria-labelledby="公开文件">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"
+                                                                                                  data-whatever="">&times;</span>
+                </button>
+                <!--New Message To：这里可以写东西-->
+                <h4 class="modal-title" id="public-file-modal-label">公开文件 [LIMIT 100 BY TIME]</h4>
+            </div>
+            <div class="modal-body">
+                <!--<div class="well well-lg" style="background-color: white">-->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered recent-file-table">
+                        <tr>
+                            <!--<th>ID</th>-->
+                            <th>文件名称</th>
+                            <th>文件大小</th>
+                            <th>提取编号</th>
+                            <th>上传日期</th>
+                            <!--<th>保存日期(单位)</th>-->
+                            <th>文件所属</th>
+                            <th>文件属性</th>
+                            <th>备注</th>
+                            <th>操作</th>
+                        </tr>
+                    </table>
+                </div>
+
+                <!--</div>-->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="mybatisModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"
+                                                                                                  data-whatever="">&times;</span>
+                </button>
+                <h4 class="modal-title">生成选项 【 仅限MYSQL数据库 】</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+
+                    <div class="form-group">
+                        <label for="mybatis-domain-input">服务器地址丨域名</label>
+                        <input type="email" class="form-control" id="mybatis-domain-input"
+                               placeholder="本地数据库一般不可用">
+                    </div>
+                    <div class="form-group">
+                        <label for="mybatis-port-input">端口号</label>
+                        <input type="password" class="form-control" id="mybatis-port-input" placeholder="3306">
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">用户名</label>
+                        <input type="email" class="form-control" id="mybatis-user-input"
+                               placeholder="仅作连接使用，不会保存任何信息">
+                    </div>
+                    <div class="form-group">
+                        <label for="mybatis-pwd-input">密码</label>
+                        <input type="password" class="form-control" id="mybatis-pwd-input">
+                    </div>
+
+                    <label>数据库表</label>
+                    <div class="row" id="mybatis-tables-container">
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <br>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <br>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="text" class="form-control">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger file-up-load-modal-close" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-info start-mybatis-gen" style="margin-left: 26px">生成并下载</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid" style="padding: 0">
 
     <nav class="navbar navbar-default navbar-fixed-top navbar-has-shadow" style="background: whitesmoke">
@@ -96,11 +210,11 @@
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
-                        <!--data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
-                    <!--<span class="sr-only">Toggle navigation</span>-->
-                    <!--<span class="icon-bar"></span>-->
-                    <!--<span class="icon-bar"></span>-->
-                    <!--<span class="icon-bar"></span>-->
+                <!--data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
+                <!--<span class="sr-only">Toggle navigation</span>-->
+                <!--<span class="icon-bar"></span>-->
+                <!--<span class="icon-bar"></span>-->
+                <!--<span class="icon-bar"></span>-->
                 <!--</button>-->
                 <a class="navbar-brand" href="#" onclick="makeEgg()">
                     <!--<span class="brand_icon ico"></span>-->
@@ -122,16 +236,6 @@
                     <li class="active"><a role="button" style="background-color: whitesmoke">首页<span class="sr-only">(current)</span></a>
                     </li>
                     <li><a role="button" onclick="showIntro()">简介</a></li>
-                    <!--<li class="dropdown">-->
-                    <!--<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
-                    <!--aria-expanded="false">F&C<span class="caret"></span></a>-->
-                    <!--<ul class="dropdown-menu">-->
-                    <!--<li><a role="button">Hadoop</a></li>-->
-                    <!--<li role="separator" class="divider"></li>-->
-                    <!--<li><a role="button">SpringCloud</a></li>-->
-                    <!--</ul>-->
-                    <!--</li>-->
-
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">文件<span class="caret"></span></a>
@@ -149,6 +253,7 @@
                                                    data-target="#exampleModal"></a></li>
                         </ul>
                     </li>
+                    <li><a role="button" onclick="showPublicFile()">公开文件</a></li>
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">连续互通<span class="caret"></span></a>
@@ -172,6 +277,16 @@
                            aria-expanded="false">小游戏<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a role="button" id="go_stroke">自动一笔画</a>
+                            </li>
+                        </ul>
+                    </li>
+
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">工具<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a role="button" id="mybatis">mybatis逆向工程</a>
                             </li>
                         </ul>
                     </li>

@@ -1,8 +1,8 @@
 function showLRHeader(type) {
     $(".d_title").css("display", "none");
-    var $div_middle = $(".lr_div_middle");
-    var $login_div = $(".login_div");
-    var $register_div = $(".register_div");
+    let $div_middle = $(".lr_div_middle");
+    let $login_div = $(".login_div");
+    let $register_div = $(".register_div");
     switch (type) {
         case 0:
             $login_div.css("display", "none");
@@ -69,4 +69,17 @@ function slideUpR() {
 function slideUpL() {
     $(".login_div").hide(1000);
     $(".lr_div_middle").hide(1000);
+}
+
+
+function showPublicFile() {
+    $.get({
+        url: 'api/file/getPublic',
+        success: function (resp) {
+            $("#public-file-modal").modal('show');
+        },
+        fail: function () {
+            alert("服务开小差咯～");
+        }
+    });
 }

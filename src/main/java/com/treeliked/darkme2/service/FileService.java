@@ -67,4 +67,9 @@ public interface FileService {
      */
     int deleteFile(String id) throws Exception;
 
+    /**
+     *  获取公开文件
+     * @return 文件列表
+     */
+    List<File> getPublicFile();
 }

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 /**
  * file control
@@ -132,6 +133,16 @@ public class FileController {
             // 文件不存在
             resp.setMessage("0");
         }
+        return resp;
+    }
+
+
+    @GetMapping("getPublic")
+    public Response getPublicFile() {
+        Response resp = new Response();
+        List<File> file = fileService.getPublicFile();
+        resp.setMessage("1");
+        resp.setData0(file);
         return resp;
     }
 

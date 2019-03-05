@@ -77,6 +77,7 @@ public class UserController {
             cookie.setMaxAge(len);
         }
 
+
         request.getServletContext().setAttribute(session.getId(), session);
         response.addCookie(cookie);
         return resp;

@@ -16,4 +16,12 @@ public class IdUtils {
     public static String get32Id() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
+
+
+    /**
+     * 获取8长id，去除小短横
+     */
+    public static String get8Id() {
+        return get32Id().substring(0,8);
+    }
 }
