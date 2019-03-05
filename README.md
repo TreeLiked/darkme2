@@ -3,6 +3,9 @@
 #### 使用指南
 
 ---
+- [动画页](https://darkme.cn)
+- [首页](https://darkme.cn/index)
+- [一笔画自动路径寻找](https://darkme.cn/stroke)
 
 ###### 用户功能
 
@@ -49,7 +52,7 @@
 
 - 一笔画游戏的自动路径寻找
 
-  > 请耐心等待网页加载完成后使用！！！[点我前往](htttps://darkme.cn/stroke)
+  > 请耐心等待网页加载完成后使用！！！[点我前往](https://darkme.cn/stroke)
 
   - 功能截图
     ![](https://ws2.sinaimg.cn/large/006tNbRwgy1fygs7b0vq8j31g20u0753.jpg)
