@@ -1,20 +1,20 @@
 package com.treeliked.darkme2.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.treeliked.darkme2.algorithm.Alus;
 import com.treeliked.darkme2.model.stroke.Loc;
 import com.treeliked.darkme2.model.stroke.StrokeData;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
 
 /**
  * game controller

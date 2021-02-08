@@ -1,11 +1,19 @@
 package com.treeliked.darkme2.service.impl;
 
-import com.treeliked.darkme2.model.dao.UserMapper;
-import com.treeliked.darkme2.model.dataobject.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.treeliked.darkme2.dao.UserMapper;
+import com.treeliked.darkme2.dataobject.IUserDO;
+import com.treeliked.darkme2.model.domain.IUser;
 import com.treeliked.darkme2.service.UserService;
 import com.treeliked.darkme2.util.IdUtils;
+import com.treeliked.darkme2.util.TransferUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 用户服务接口实现
@@ -16,49 +24,86 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserMapper userMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 是否邮箱flag
      */
     private static final String MAIL_FLAG = "@";
 
-
-    @Autowired
-    public UserServiceImpl(UserMapper userMapper) {
-        this.userMapper = userMapper;
-    }
-
-
     @Override
-    public int insertUser(User user) throws Exception {
+    public int insertUser(IUser user) {
         user.setId(IdUtils.get32Id());
         return userMapper.insert(user);
     }
 
     @Override
-    public User hasMatchUserByUsername(String username, String password) throws Exception {
-        return userMapper.hasMatchUser1(username, password);
+    public IUser hasMatchUserByUsername(String username, String password) {
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            return null;
+        }
+        return TransferUtils.toUserModel(userMapper.selectByName(username, password));
     }
 
     @Override
-    public User hasMatchUserByEmail(String email, String password) throws Exception {
-        return userMapper.hasMatchUser2(email, password);
+    public IUser hasMatchUserByEmail(String email, String password) {
+        if (StringUtils.isEmpty(email) || StringUtils.isEmpty(password)) {
+            return null;
+        }
+        return TransferUtils.toUserModel(userMapper.selectByEmail(email, password));
     }
 
     @Override
-    public User hasMatchUser(String name, String pwd) throws Exception {
+    public IUser hasThisUsername(String username) {
+        return TransferUtils.toUserModel(userMapper.selectHasName(username));
+    }
+
+    @Override
+    public IUser hasThisEmail(String email) {
+        return TransferUtils.toUserModel(userMapper.selectHasEmail(email));
+    }
+
+    @Override
+    public IUser getUserById(String userId) {
+        return TransferUtils.toUserModel(userMapper.selectByPrimaryKey(userId));
+    }
+
+    @Override
+    public IUser hasMatchUser(String name, String pwd) {
         return name.contains(MAIL_FLAG) ? hasMatchUserByEmail(name, pwd) : hasMatchUserByUsername(name, pwd);
     }
 
     @Override
-    public int hasMatchUsername(String name) throws Exception {
-        int i;
-        if (name.contains(MAIL_FLAG)) {
-            i = userMapper.hasMatcherUsername2(name);
-        } else {
-            i = userMapper.hasMatcherUsername1(name);
+    public boolean hasMatchUsername(String key) {
+        if (StringUtils.isEmpty(key)) {
+            return true;
         }
-        return i;
+        return (key.contains(MAIL_FLAG) ? hasThisEmail(key) : hasThisUsername(key)) != null;
+    }
+
+    @Override
+    public List<IUser> getAllUsers() {
+        List<IUserDO> userDos = userMapper.selectAll();
+        if (CollectionUtils.isEmpty(userDos)) {
+            return new ArrayList<>();
+        }
+        return userDos.stream().map(TransferUtils::toUserModel).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IUser> getUsersByKey(String usernameKey) {
+        List<IUser> users = getAllUsers();
+        if (CollectionUtils.isEmpty(users)) {
+            return new ArrayList<>();
+        }
+        if (StringUtils.isBlank(usernameKey)) {
+            return users;
+        }
+        usernameKey = usernameKey.trim();
+        String finalUsernameKey = usernameKey;
+        return users.stream()
+                .filter(user -> user.getName().contains(finalUsernameKey))
+                .collect(Collectors.toList());
     }
 }

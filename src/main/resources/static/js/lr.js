@@ -188,13 +188,13 @@ function l_post(v1, v2, v3) {
         },
         dataType: "json",
         cache: false,
-        success: function (resp) {
-            let code = resp.code;
-            if (code === "SUCCESS") {
-                let flag = resp.message;
+        success: function (result) {
+            let code = result.code;
+            if (result && result.success && result.success === true) {
+                let flag = result.data;
                 if (flag === "1") {
                     showLRHeader(3);
-                    $("#personal-center").html("欢迎您, " + resp.data0 + "<span class='caret'></span>");
+                    $("#personal-center").html("欢迎您, " + result.data + "<span class='caret'></span>");
                     $("#li-personal-center").show();
                     $("#li-login").hide();
                     $("#li-login-out").show();

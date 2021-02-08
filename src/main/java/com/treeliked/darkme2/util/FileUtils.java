@@ -1,7 +1,7 @@
 package com.treeliked.darkme2.util;
 
 /**
- * TODO
+ * 文件工具类
  *
  * @author lqs2
  * @date 2018-12-18, Tue

@@ -1,10 +1,14 @@
 package com.treeliked.darkme2.controller;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.List;
+
 import com.treeliked.darkme2.constant.SessionConstant;
 import com.treeliked.darkme2.model.Response;
 import com.treeliked.darkme2.model.ResultCode;
 import com.treeliked.darkme2.service.FileService;
-import com.treeliked.darkme2.service.MemoService;
 import com.treeliked.darkme2.util.SessionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * 页面控制器
@@ -27,18 +26,8 @@ import java.util.List;
 @Controller
 public class PageController {
 
-
-    private final FileService fileService;
-
-    private final MemoService memoService;
-//    private final MemoMapper memoMapper;
-//    private final UserMapper userMapper;
-
     @Autowired
-    public PageController(FileService fileService, MemoService memoService) {
-        this.fileService = fileService;
-        this.memoService = memoService;
-    }
+    private FileService fileService;
 
     @RequestMapping("/")
     public String goMain(HttpServletResponse response) {
@@ -51,14 +40,12 @@ public class PageController {
         return "hello";
     }
 
-
     @RequestMapping("index")
     public String main(HttpServletResponse response, Model model) {
         response.setContentType("text/html;charset=utf-8");
         model.addAttribute("subFrame", "hello");
         return "index";
     }
-
 
     @RequestMapping("myFile")
     public String mFile(HttpServletResponse response, HttpSession session, Model model) throws Exception {
@@ -105,9 +92,9 @@ public class PageController {
         String username = SessionUtils.getUserNameInSession(session);
         if (username != null) {
             int result1 = fileService.getFileByUser(username).size();
-            int result2 = memoService.getMemoCountByUser(username);
+            //int result2 = memoService.getMemoCountByUser(username);
             resp.setData0(result1);
-            resp.setData1(result2);
+            //resp.setData1(result2);
         } else {
             resp.setCode(ResultCode.FAIL);
         }

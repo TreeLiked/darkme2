@@ -1,21 +1,31 @@
 package com.treeliked.darkme2.controller;
 
-import com.treeliked.darkme2.constant.SessionConstant;
-import com.treeliked.darkme2.model.Response;
-import com.treeliked.darkme2.model.ResultCode;
-import com.treeliked.darkme2.model.dataobject.User;
-import com.treeliked.darkme2.service.UserService;
-import com.treeliked.darkme2.util.CookieUtils;
-import com.treeliked.darkme2.util.SessionUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.List;
+
+import com.iutr.shared.model.Result;
+import com.iutr.shared.utils.ResultUtils;
+import com.treeliked.darkme2.constant.SessionConstant;
+import com.treeliked.darkme2.model.Response;
+import com.treeliked.darkme2.model.ResultCode;
+import com.treeliked.darkme2.model.domain.IUser;
+import com.treeliked.darkme2.service.UserService;
+import com.treeliked.darkme2.util.CookieUtils;
+import com.treeliked.darkme2.util.SessionUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * user control
@@ -25,30 +35,25 @@ import javax.servlet.http.HttpSession;
  */
 @Slf4j
 @RestController
+@RequestMapping("/api/user/")
 public class UserController {
 
-
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 是否邮箱flag
      */
     private static final String MAIL_FLAG = "@";
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    @PostMapping(value = "login")
+    public Result<IUser> loginValidate(@RequestBody IUser user,
+            HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
 
-    @PostMapping(value = "lv")
-    public Response loginValidate(@RequestParam("u1") String username, @RequestParam("u2") String pwd, boolean u3,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  HttpSession session) throws Exception {
+        Result<IUser> result = new Result<>();
 
-        Response resp = new Response();
-
-        User user;
+        String username = user.getName();
+        String pwd = user.getPassword();
         if (username.contains(MAIL_FLAG)) {
             // 邮箱登录
             user = userService.hasMatchUserByEmail(username, pwd);
@@ -56,51 +61,72 @@ public class UserController {
             user = userService.hasMatchUserByUsername(username, pwd);
         }
         if (user == null) {
-            resp.setMessage("-1");
-            return resp;
+            result.setSuccess(false);
+            return result;
         }
-        resp.setMessage("1");
-        resp.setData0(user.getUsername());
+        result.setSuccess(true);
+        result.setData(user);
 
         // 写入session
-        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_NAME, user.getUsername());
-
-        Cookie cookie = new Cookie(SessionConstant.COOKIE_OF_USER_INFO, session.getId());
-        if (u3) {
-            int len = SessionConstant.TIME_OF_REMEMBER;
-            session.setMaxInactiveInterval(len);
-            cookie.setMaxAge(len);
-
-        } else {
-            int len = SessionConstant.TIME_OF_TEMP;
-            session.setMaxInactiveInterval(len);
-            cookie.setMaxAge(len);
-        }
-
-
+        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_NAME, user.getName());
+        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_ID, user.getId());
+        // 是否用户点击记住我
+        boolean rememberMe = true;
+        int len = rememberMe ? SessionConstant.TIME_OF_REMEMBER : SessionConstant.TIME_OF_TEMP;
+        session.setMaxInactiveInterval(len);
         request.getServletContext().setAttribute(session.getId(), session);
+
+        // 写入cookie
+        Cookie cookie = new Cookie(SessionConstant.COOKIE_OF_USER_INFO, session.getId());
+        cookie.setMaxAge(len);
+        cookie.setPath("/");
         response.addCookie(cookie);
-        return resp;
+
+        return result;
 
     }
 
-    @GetMapping(value = "haveRememberMe")
-    public Response haveRememberMe(@RequestParam("ssId") String sessionId, HttpServletRequest request, HttpSession session) {
-        Response resp = new Response();
-        HttpSession userSession = (HttpSession) request.getServletContext().getAttribute(sessionId);
-        if (userSession != null) {
-            String username = (String) userSession.getAttribute(SessionConstant.KEY_OF_USER_NAME);
-            session.setAttribute(SessionConstant.KEY_OF_USER_NAME, username);
-            resp.setMessage(username);
-        } else {
-            resp.setCode(ResultCode.FAIL);
+    @GetMapping(value = "cls")
+    public Result<IUser> checkLoginStatus(HttpServletRequest request, HttpSession session) {
+        String userId = CookieUtils.getSessionUserId(request);
+        if (StringUtils.isEmpty(userId)) {
+            return ResultUtils.newFailedResult("没有登录信息");
         }
-        return resp;
+        IUser user = userService.getUserById(userId);
+        if (user == null) {
+            return ResultUtils.newFailedResult("非法用户");
+        }
+        session.setAttribute(SessionConstant.KEY_OF_USER_NAME, user.getName());
+        session.setAttribute(SessionConstant.KEY_OF_USER_ID, user.getId());
+        return ResultUtils.newSuccessfulResult(user);
     }
 
+    @GetMapping(value = "dls")
+    public Result<Void> dropLoginStatus(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
 
-    @PostMapping(value = "rv", consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE})
-    public Response registerValidate(@RequestBody User user) throws Exception {
+        Cookie sessionIdCookie = CookieUtils.getCookieByName(request, SessionConstant.COOKIE_OF_USER_INFO);
+        if (sessionIdCookie == null || StringUtils.isEmpty(sessionIdCookie.getValue())) {
+            return ResultUtils.newSuccessfulResult();
+        }
+        String sessionId = sessionIdCookie.getValue();
+        HttpSession userSession = (HttpSession) request.getServletContext().getAttribute(sessionId);
+        // 删除session
+        session.invalidate();
+        if (userSession == null) {
+            return ResultUtils.newSuccessfulResult();
+        }
+        userSession.invalidate();
+
+
+        // 删除cookie
+        sessionIdCookie.setMaxAge(0);
+        response.addCookie(sessionIdCookie);
+
+        return ResultUtils.newSuccessfulResult();
+    }
+
+    @PostMapping(value = "rv", consumes = { MediaType.APPLICATION_JSON_UTF8_VALUE })
+    public Response registerValidate(@RequestBody IUser user) throws Exception {
         Response resp = new Response();
         int i = userService.insertUser(user);
         if (i != 1) {
@@ -109,23 +135,12 @@ public class UserController {
         return resp;
     }
 
-
     @GetMapping(value = "trunie")
-    public Response testRegisterUsernameIsExist(@RequestParam("u1") String username) throws Exception {
-
-        Response resp = new Response();
-
-        int i = userService.hasMatchUsername(username);
-
-        if (i == 1) {
-            resp.setMessage("1");
-        } else {
-            resp.setMessage("0");
-        }
-        return resp;
+    public Result<Boolean> testRegisterUsernameIsExist(@RequestParam("u1") String username) throws Exception {
+        return ResultUtils.newSuccessfulResult(userService.hasMatchUsername(username));
     }
 
-    @RequestMapping(value = "loginOut", method = {RequestMethod.GET})
+    @RequestMapping(value = "loginOut", method = { RequestMethod.GET })
     public void loginOut(String u1, HttpServletRequest request) {
         try {
             Cookie cookie = CookieUtils.getCookieByName(request, SessionConstant.KEY_OF_USER_NAME);
@@ -139,5 +154,10 @@ public class UserController {
         } catch (Exception e) {
             log.error(e.toString());
         }
+    }
+
+    @GetMapping("searchByKey")
+    public Result<List<IUser>> searchUsersByNames(@RequestParam(value = "key", required = false) String key) {
+        return ResultUtils.newSuccessfulResult(userService.getUsersByKey(key));
     }
 }

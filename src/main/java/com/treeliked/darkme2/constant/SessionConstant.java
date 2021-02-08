@@ -12,6 +12,7 @@ public class SessionConstant {
      * 在会话中存储用户名的key
      */
     public static final String KEY_OF_USER_NAME = "USER_NAME";
+    public static final String KEY_OF_USER_ID = "USER_ID";
 
 
     /**

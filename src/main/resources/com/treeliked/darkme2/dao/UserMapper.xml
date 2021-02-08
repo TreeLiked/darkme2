@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.treeliked.darkme2.dao.UserMapper">
+    <resultMap id="BaseResultMap" type="com.treeliked.darkme2.dataobject.IUserDO">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="Name" jdbcType="VARCHAR" property="name"/>
+        <result column="Password" jdbcType="VARCHAR" property="password"/>
+        <result column="Email" jdbcType="VARCHAR" property="email"/>
+        <result column="GmtCreated" jdbcType="TIMESTAMP" property="gmtCreated"/>
+        <result column="GmtModified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from User
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.treeliked.darkme2.dataobject.IUserDO">
+        insert into User (id, Name, Password,
+                          Email, GmtCreated, GmtModified)
+        values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+                #{email,jdbcType=VARCHAR}, #{gmtcreated,jdbcType=TIMESTAMP}, #{gmtmodified,jdbcType=TIMESTAMP})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.treeliked.darkme2.dataobject.IUserDO">
+        update User
+        set Name        = #{name,jdbcType=VARCHAR},
+            Password    = #{password,jdbcType=VARCHAR},
+            Email       = #{email,jdbcType=VARCHAR},
+            GmtCreated  = #{gmtcreated,jdbcType=TIMESTAMP},
+            GmtModified = #{gmtmodified,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, Name, Password, Email, GmtCreated, GmtModified
+        from User
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, Name, Password, Email, GmtCreated, GmtModified
+        from User
+        where Name = #{name,jdbcType=VARCHAR}
+          and Password = #{pwd,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectHasName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, Name, Password, Email, GmtCreated, GmtModified
+        from User
+        where Name = #{name,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByEmail" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, Name, Password, Email, GmtCreated, GmtModified
+        from User
+        where Email = #{email,jdbcType=VARCHAR}
+          and Password = #{pwd,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectHasEmail" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, Name, Password, Email, GmtCreated, GmtModified
+        from User
+        where Email = #{email,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select id, Name, Password, Email, GmtCreated, GmtModified
+        from User
+    </select>
+</mapper>

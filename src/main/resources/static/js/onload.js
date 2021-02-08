@@ -1,7 +1,6 @@
 $(function () {
 
     Bucket1 = 'public1-1253931949';
-    Bucket60 = 'public60-1253931949';
     Region = "ap-shanghai";
 
 
@@ -19,26 +18,6 @@ $(function () {
         }
     });
     let user_info_cookie = Cookies.get("USER_INFO_COOKIE");
-    if (user_info_cookie !== undefined && user_info_cookie !== null ) {
-        $.get({
-            url: "haveRememberMe",
-            data: {
-                ssId: Cookies.get("USER_INFO_COOKIE")
-            },
-            dataType: "json",
-            cache: false,
-            async: true,
-            success: function (resp) {
-                if (resp.code === "SUCCESS") {
-                    $("#personal-center").html("欢迎您, " + resp.message + "<span class='caret'></span>");
-                    $("#li-personal-center").show();
-                    $("#li-login").hide();
-                    $("#li-login-out").show();
-                    $("#li-register").hide();
-                }
-            }
-        });
-    }
 
     $('#exampleModal').on('show.bs.modal', function () {
         // let button = $(event.relatedTarget);
@@ -112,8 +91,8 @@ $(function () {
 });
 
 function goUpload() {
-    uploadFile($(".file-upload-attach").val(), $(".file-upload-destination").val());
-    $(".file-up-load-modal-close").click();
+    // uploadFile($(".file-upload-attach").val(), $(".file-upload-destination").val());
+    // $(".file-up-load-modal-close").click();
 }
 
 function chooseSearchWhat() {

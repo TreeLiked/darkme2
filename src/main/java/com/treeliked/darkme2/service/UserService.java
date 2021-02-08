@@ -1,6 +1,8 @@
 package com.treeliked.darkme2.service;
 
-import com.treeliked.darkme2.model.dataobject.User;
+import java.util.List;
+
+import com.treeliked.darkme2.model.domain.IUser;
 
 /**
  * 用户服务接口
@@ -10,7 +12,6 @@ import com.treeliked.darkme2.model.dataobject.User;
  */
 public interface UserService {
 
-
     /**
      * 用户注册
      *
@@ -18,7 +19,7 @@ public interface UserService {
      * @return 1插入成功
      * @throws Exception 异常
      */
-    int insertUser(User user) throws Exception;
+    int insertUser(IUser user) throws Exception;
 
     /**
      * 根据用户名查询指定的用户
@@ -28,29 +29,49 @@ public interface UserService {
      * @return user model
      * @throws Exception 抛出所有异常
      */
-    User hasMatchUserByUsername(String username, String password) throws Exception;
+    IUser hasMatchUserByUsername(String username, String password) throws Exception;
 
     /**
      * 根据用户邮箱查询指定的用户
      *
-     * @param email    邮箱
+     * @param email 邮箱
      * @param password 密码
      * @return user model
      * @throws Exception 抛出所有异常
      */
-    User hasMatchUserByEmail(String email, String password) throws Exception;
+    IUser hasMatchUserByEmail(String email, String password) throws Exception;
 
+    /**
+     * 根据用户名查询指定的用户
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @return user model
+     * @throws Exception 抛出所有异常
+     */
+    IUser hasThisUsername(String username) throws Exception;
+
+    /**
+     * 根据用户邮箱查询指定的用户
+     *
+     * @param email 邮箱
+     * @param password 密码
+     * @return user model
+     * @throws Exception 抛出所有异常
+     */
+    IUser hasThisEmail(String email) throws Exception;
+
+    IUser getUserById(String userId);
 
     /**
      * 根据用户邮箱/用户名查询指定的用户
      *
      * @param name 用户名/邮箱
-     * @param pwd  密码
+     * @param pwd 密码
      * @return user model
      * @throws Exception 抛出所有异常
      */
-    User hasMatchUser(String name, String pwd) throws Exception;
-
+    IUser hasMatchUser(String name, String pwd) throws Exception;
 
     /**
      * 查询是否存在此用户
@@ -59,5 +80,19 @@ public interface UserService {
      * @return >1则存在用户
      * @throws Exception 抛出所有异常
      */
-    int hasMatchUsername(String name) throws Exception;
+    boolean hasMatchUsername(String key) throws Exception;
+
+    /**
+     * 获取所有的用户
+     *
+     * @return 用户集合
+     */
+    List<IUser> getAllUsers();
+
+    /**
+     * 根据用户名关键字检索用户
+     * @param usernameKey 关键字
+     * @return 用户集合
+     */
+    List<IUser> getUsersByKey(String usernameKey);
 }

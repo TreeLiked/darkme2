@@ -11,7 +11,7 @@ public class FileStorageConstant {
     /**
      * 用户未登录，临时存储，有效期，一天
      */
-    public static final int FILE_SAVE_SHORT_TIME = 1;
+    public static final int FILE_SAVE_SHORT_TIME = 30;
 
 
     /**

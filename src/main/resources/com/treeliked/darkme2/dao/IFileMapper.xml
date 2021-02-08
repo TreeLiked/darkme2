@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.treeliked.darkme2.dao.IFileMapper">
+    <resultMap id="BaseResultMap" type="com.treeliked.darkme2.dataobject.IFilePO">
+        <id column="Id" jdbcType="VARCHAR" property="id"/>
+        <result column="UserId" jdbcType="VARCHAR" property="userId"/>
+        <result column="DestUserId" jdbcType="VARCHAR" property="destUserId"/>
+        <result column="Size" jdbcType="BIGINT" property="size"/>
+        <result column="No" jdbcType="VARCHAR" property="no"/>
+        <result column="SaveDays" jdbcType="INTEGER" property="saveDays"/>
+        <result column="BucketId" jdbcType="VARCHAR" property="bucketId"/>
+        <result column="Attach" jdbcType="VARCHAR" property="attach"/>
+        <result column="Name" jdbcType="VARCHAR" property="name"/>
+        <result column="Open" jdbcType="BIT" property="open"/>
+        <result column="Password" jdbcType="VARCHAR" property="password"/>
+        <result column="GmtCreated" jdbcType="TIMESTAMP" property="gmtCreated"/>
+        <result column="GmtModified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+
+    <sql id="selectOnly">
+        select Id,
+               UserId,
+               DestUserId,
+               Size,
+               No,
+               SaveDays,
+               BucketId,
+               Attach,
+               Name,
+               Open,
+               Password,
+               GmtCreated,
+               GmtModified
+        from darkme.IFile
+    </sql>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from darkme.IFile
+        where Id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.treeliked.darkme2.dataobject.IFilePO">
+        insert into darkme.IFile (Id, UserId, DestUserId, Size,
+                                  No, SaveDays, BucketId,
+                                  Attach, Name, Open, Password, GmtCreated,
+                                  GmtModified)
+        values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{destUserId,jdbcType=VARCHAR},
+                #{size,jdbcType=BIGINT},
+                #{no,jdbcType=VARCHAR}, #{saveDays,jdbcType=INTEGER}, #{bucketId,jdbcType=VARCHAR},
+                #{attach,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{open,jdbcType=BIT},
+                #{password,jdbcType=VARCHAR},
+                now(), now())
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.treeliked.darkme2.dataobject.IFilePO">
+        update IFile
+        set UserId      = #{userId,jdbcType=VARCHAR},
+            DestUserId  = #{destUserId,jdbcType=VARCHAR},
+            Size        = #{size,jdbcType=BIGINT},
+            No          = #{no,jdbcType=VARCHAR},
+            SaveDays    = #{saveDays,jdbcType=INTEGER},
+            BucketId    = #{bucketId,jdbcType=VARCHAR},
+            Attach      = #{attach,jdbcType=VARCHAR},
+            Name        = #{name,jdbcType=VARCHAR},
+            Open        = #{open,jdbcType=BIT},
+            GmtModified = now()
+        where Id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        <include refid="selectOnly"/>
+        where Id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByUser" parameterType="java.lang.String" resultMap="BaseResultMap">
+        <include refid="selectOnly"/>
+        where UserId = #{userId} or DestUserId = #{userId}
+    </select>
+    <select id="selectByFileNo" parameterType="java.lang.String" resultMap="BaseResultMap">
+        <include refid="selectOnly"/>
+        where No = #{fileNo,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        <include refid="selectOnly"/>
+    </select>
+
+    <select id="selectAllOpenFile" resultMap="BaseResultMap">
+        <include refid="selectOnly"/>
+        <where>
+            <if test="key != null">
+                and Name like concat(concat('%',#{key}),'%')
+            </if>
+            and Open = 1
+        </where>
+        order by GmtModified desc, id desc
+        <bind name="offset" value="(currentPage - 1) * pageSize"/>
+        <if test="currentPage !=null and currentPage > 0 and offset != null and offset >= 0">
+            limit #{offset}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="selectAllOpenFileCount" resultType="int">
+        select count(*) from darkme.IFile
+        <where>
+            <if test="key != null">
+                and Name like concat(concat('%',#{key}),'%')
+            </if>
+            and Open = 1
+
+        </where>
+        <!--        order by GmtModified desc, id desc-->
+        <!--        <bind name="offset" value="(currentPage - 1) * pageSize"/>-->
+        <!--        <if test="currentPage !=null and currentPage > 0 and offset != null and offset >= 0">-->
+        <!--            limit #{offset}, #{pageSize}-->
+        <!--        </if>-->
+    </select>
+</mapper>

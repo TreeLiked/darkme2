@@ -1,13 +1,13 @@
 package com.treeliked.darkme2.config;
 
-import com.treeliked.darkme2.model.Response;
-import com.treeliked.darkme2.model.ResultCode;
+import javax.servlet.http.HttpServletRequest;
+
+import com.iutr.shared.model.Result;
+import com.iutr.shared.model.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 全局异常拦截
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  * @date 2018/8/3, Fri
  */
 @Slf4j
-@ControllerAdvice(basePackages = {"com.treeliked.darkme2.controller"})
+@ControllerAdvice(basePackages = { "com.treeliked.darkme2.controller" })
 public class GlobalExceptionHandler {
 
     /**
@@ -26,19 +26,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public Response errorHandle(HttpServletRequest request, Exception e) {
+    public Result<?> errorHandle(HttpServletRequest request, Exception e) {
 
         String url = request.getRequestURL().toString();
         log.error("Access to {} occur error -> \n{}", url, e);
 
-        Response resp = new Response();
+        Result<?> result = new Result<>();
 
-        resp.setCode(ResultCode.INTERNAL_SERVER_ERROR);
-        resp.setMessage(DEFAULT_ERROR_MESSAGE);
-
-        resp.setData0("RequestUrl: " + request.getRequestURL().toString());
-        resp.setData1("ErrorMessage: " + e.getMessage());
-
-        return resp;
+        result.setCode(ResultStatus.UN_HANDLE_ERROR.getCode());
+        result.setMessage(e.getMessage());
+        return result;
     }
 }

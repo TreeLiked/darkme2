@@ -1,14 +1,9 @@
 package com.treeliked.darkme2.interceptor;
 
-import com.treeliked.darkme2.constant.SessionConstant;
-import com.treeliked.darkme2.model.Response;
-import com.treeliked.darkme2.model.ResultCode;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * api拦截，检查会话是否超时
@@ -21,15 +16,15 @@ public class ApiInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        String username = (String) request.getSession().getAttribute(SessionConstant.KEY_OF_USER_NAME);
-        // 是否session中存在用户名
-        if (StringUtils.isEmpty(username)) {
-            // 会话已经过期
-            Response resp = new Response();
-            resp.setCode(ResultCode.FAIL);
-            resp.setMessage(SessionConstant.TIME_OUT);
-            return false;
-        }
+        // String username = (String) request.getSession().getAttribute(SessionConstant.KEY_OF_USER_NAME);
+        // // 是否session中存在用户名
+        // if (StringUtils.isEmpty(username)) {
+        //     // 会话已经过期
+        //     Response resp = new Response();
+        //     resp.setCode(ResultCode.FAIL);
+        //     resp.setMessage(SessionConstant.TIME_OUT);
+        //     return false;
+        // }
         return true;
     }
 

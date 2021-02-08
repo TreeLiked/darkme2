@@ -1,157 +1,84 @@
 // noinspection SpellCheckingInspection
-function uploadFile(atta, destination) {
-    let file = document.getElementById("file").files[0];
-    if (!file) return;
+async function uploadFile(rawFile, fileInfo, progressCallback, errorCallback) {
+    console.log(rawFile);
+    if (!rawFile) return;
 
-    let filename = file.name;
-    let suffix = filename.substring(filename.indexOf(".") + 1);
-    if (filename.indexOf(".") > 30) {
-        filename = filename.substring(0, 30);
-        filename = filename + "." + suffix;
-    }
     $.get({
-        url: "api/file/generateFileNo",
+        url: "api/file/gfn",
         cache: false,
         async: false,
         dataType: "json",
         data: {
-            fileName: filename
+            fileName: rawFile.name
         },
-        success: function (resp) {
-            console.log(resp);
-
-            let longFlag = resp.message === "1";
-            let fileNo = resp.data0;
-            let bucketId = resp.data1;
-            if (resp.code === "SUCCESS") {
-
-                let $info_area = $(".right_info_area");
-                let $onProgressAlert = createAlertDiv("alert-info", "正在上传文件: " + file.name, true, true);
-                $info_area.append($onProgressAlert);
-                $onProgressAlert.fadeIn(1000);
-
-                let $bar_parent = $(".progress");
-                $bar_parent.show();
-
-
-                let $bar_parent_width = $bar_parent.width();
-
-                let $bar = $(".progress-bar");
-                //初始化bar
-                $bar.css("width", "0px");
-                $bar.text(0 + "%");
-
-                let $detail_info = createAlertDiv("alert-warning", "", true, true);
-                $info_area.append($detail_info);
-                $detail_info.fadeIn(1000);
-                let detailArray = new Array(3);
-
-                let haveCreatedSuccessDiv = false;
-
-                if (longFlag) {
-                    Bucket = Bucket60;
-                } else {
-                    Bucket = Bucket1;
-                }
+        success: function (result) {
+            console.log(result);
+            if (result.success) {
                 getCos().sliceUploadFile({
-                    Bucket: Bucket,
+                    Bucket: Bucket1,
                     Region: Region,
-                    Key: bucketId,
-                    Body: file,
+                    Key: result.data,
+                    Body: rawFile,
                     TaskReady: function (tid) {
                         TaskId = tid;
                     },
                     onProgress: function (progressData) {
-                        let flag = false;
-                        $.each(progressData, function (name, value) {
-                            // let a = parseInt(value);
-                            if (name === "loaded") {
-                                detailArray[0] = byte_to_KMG(value);
-                            }
-
-                            if (!flag) {
-                                if (name === "total") {
-                                    detailArray[1] = byte_to_KMG(value);
-                                    flag = true;
-                                }
-                            }
-                            if (name === "speed") {
-                                let str3;
-                                let m3 = Math.floor(value / Math.pow(1024, 2));
-                                if (m3 > 0) {
-                                    m3 = m3.toFixed(2);
-                                    str3 = m3 + " MB/s"
-                                } else {
-                                    let k3 = (value / Math.pow(1024, 1)).toFixed(2);
-                                    str3 = k3 + " KB/s";
-                                }
-                                detailArray[2] = str3;
-                            }
-                            if (name === "percent") {
-                                let percent = value.toString().charAt(0);
-                                if (percent !== "1") {
-                                    // $("#up_percent").text("上传百分比:\t" + percent + "%");
-                                    $bar.css("width", value * $bar_parent_width + "px");
-                                    percent = value.toFixed(2) * 100;
-                                    $bar.text(percent + "%");
-
-                                } else {
-                                    $bar.css("width", $bar_parent_width + "px");
-                                    $bar.text(100 + "%");
-                                    $bar.removeClass("active");
-                                    $bar_parent.fadeOut(1000);
-
-                                    $onProgressAlert.slideUp(1500);
-                                    $detail_info.slideUp(1500);
-                                    if (!haveCreatedSuccessDiv) {
-                                        let record = {
-                                            fileName: filename,
-                                            fileAttach: atta,
-                                            fileDestination: destination,
-                                            fileSize: byte_to_KMG(file.size),
-                                            fileSaveDays: longFlag ? 3650 : 1
-                                        };
-                                        $.post({
-                                            url: "api/file/generateNewFile?fileNo=" + fileNo,
-                                            cache: false,
-                                            async: false,
-                                            dataType: "json",
-                                            contentType: "application/json",
-                                            data: JSON.stringify(record),
-                                            success: function (resp) {
-                                                if (resp.code === "SUCCESS") {
-                                                    console.log(resp);
-                                                    let fileObj = resp.data0;
-                                                    let bringNo = fileObj.fileBringId;
-                                                    let days = fileObj.fileSaveDays;
-                                                    let str = "长期有效";
-                                                    if (days === '1') {
-                                                        str = "1天内有效"
-                                                    }
-                                                    let $success_info = createAlertDivClosed("alert-success", file.name, "上传成功（编号：" + bringNo + "，" + str + "）");
-                                                    $info_area.append($success_info);
-                                                    $success_info.show(1000);
-                                                    haveCreatedSuccessDiv = true;
-                                                } else {
-                                                    showBannerInfo("alert-danger", 0, "SOMETHING WENT WRONG", 2000, 1000);
-                                                }
-                                            }
-                                        });
-                                        // parent.showAmountFlags();
-                                    }
-                                    return false;
-                                }
-                            }
-                        });
-                        $detail_info.html("速度: " + detailArray[2] + "   已经上传: " + detailArray[0] + "   总计大小: " + detailArray[1]);
+                        console.log(progressData);
+                        progressCallback(progressData, result.data);
                     }
                 }, function (err, data) {
-                    console.log(err, data);
+                    errorCallback("分片上传错误，" + err);
                 });
             } else {
-                alert("服务异常");
+                errorCallback(result.message);
             }
         }
+    });
+}
+
+async function saveFile(fileNoWithSuffix, rawFile, uploadOption, callback) {
+    let record = {
+        name: rawFile.name,
+        attach: uploadOption.attach,
+        destUser: uploadOption.destUserId ? {
+            id: uploadOption.destUserId,
+        } : null,
+        size: rawFile.size,
+        saveDays: uploadOption.saveDays,
+        no: fileNoWithSuffix,
+        open: uploadOption.open,
+        password: uploadOption.password
+    };
+    $.post({
+        url: "api/file/create",
+        cache: false,
+        async: false,
+        dataType: "json",
+        contentType: "application/json",
+        data: JSON.stringify(record),
+        success: function (resp) {
+            callback(resp);
+        }
+    });
+}
+
+async function checkFilePassword(fileId, password, callback) {
+    $.get({
+        url: "api/file/checkPassword?id=" + fileId + "&pwd=" + password,
+        cache: false,
+        async: true,
+        dataType: "json",
+        success: r => callback(r)
+    });
+}
+
+async function doFileDownload(fileId, password, callback) {
+    $.get({
+        url: "api/file/doDownload?id=" + fileId + "&pwd=" + password,
+        cache: false,
+        async: true,
+        dataType: "json",
+        success: r => callback(r)
     });
 }
 

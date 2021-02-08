@@ -2,7 +2,7 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
 
-    <title>给你的情书</title>
+    <title>润物细无声</title>
 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,6 +10,7 @@
     <meta name="baidu-site-verification" content="79bZQUEI5o"/>
 
     <link th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/css/stars.css}">
     <script type="text/javascript" th:src="@{/js/jquery-3.3.1.js}"></script>
@@ -30,22 +31,30 @@
     <script type="text/javascript" th:src="@{/js/action.js}"></script>
     <script type="text/javascript" th:src="@{/js/jquery.zclip.js}"></script>
     <script type="text/javascript" th:src="@{/js/handoff.js}"></script>
+    <script type="text/javascript" th:src="@{/js/user.js}"></script>
+    <script type="text/javascript" th:src="@{/js/file.js}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
     <script type="text/javascript">
         // 禁止鼠标右键
-        document.oncontextmenu = function () {
-            return false;
-        };
-        //禁止元素被选中
-        if (typeof (document.onselectstart) !== 'undefined') {
-            // IE chrome下禁止元素被选中
-            document.onselectstart = function () {
-                return false;
-            }
-        } else {
-            // firefox下禁止元素被选中的变通办法
-            document.write('<style type="text/css">body { -moz-user-select: none; }</style>');
-        }
+        // document.oncontextmenu = function () {
+        //     return false;
+        // };
+        // //禁止元素被选中
+        // if (typeof (document.onselectstart) !== 'undefined') {
+        //     // IE chrome下禁止元素被选中
+        //     document.onselectstart = function () {
+        //         return false;
+        //     }
+        // } else {
+        //     // firefox下禁止元素被选中的变通办法
+        //     document.write('<style type="text/css">body { -moz-user-select: none; }</style>');
+        // }
 
     </script>
 
@@ -152,7 +161,7 @@
 
 
                     <div class="form-group">
-                        <label for="exampleInputEmail1">用户名</label>
+                        <label for="mybatis-user-input">用户名</label>
                         <input type="email" class="form-control" id="mybatis-user-input"
                                placeholder="仅作连接使用，不会保存任何信息">
                     </div>
@@ -203,359 +212,784 @@
     </div>
 </div>
 
-<div class="container-fluid" style="padding: 0">
+<div id="app">
+    <!-- 1680 * 1050 -->
+    <el-dialog :title="commonHelp.title" :visible.sync="dialogVisibility.commonHelp" width="30%" center>
+        <span v-html="commonHelp.content"></span>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="dialogVisibility.commonHelp = false" size="small">确 定</el-button>
+        </span>
+    </el-dialog>
 
-    <nav class="navbar navbar-default navbar-fixed-top navbar-has-shadow" style="background: whitesmoke">
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
-                <!--data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
-                <!--<span class="sr-only">Toggle navigation</span>-->
-                <!--<span class="icon-bar"></span>-->
-                <!--<span class="icon-bar"></span>-->
-                <!--<span class="icon-bar"></span>-->
-                <!--</button>-->
-                <a class="navbar-brand" href="#" onclick="makeEgg()">
-                    <!--<span class="brand_icon ico"></span>-->
-                    <!--<span class="brand_icon glyphicon glyphicon-grain"></span>-->
-                    <!--<img src="/static/pic.png">-->
+    <el-dialog title="文件上传选项" :visible.sync="dialogVisibility.fileUpload" width="40%" center
+               :close-on-click-modal="false"
+               :close-on-press-escape="false" :destroy-on-close="true">
+        <el-form ref="form" :model="form.fileUpload" label-width="80px">
 
-                    <img th:src="@{/pic.png}" style="width: 20px; height: 20px;">
-                    <script type="text/javascript">
-                        function makeEgg() {
-                            alert("点我干啥");
-                        }
-                    </script>
-                </a>
+            <el-form-item label="当前选择">
+                <span> {{ form.fileUpload.names }}</span>
+            </el-form-item>
+
+            <el-form-item label="是否公开">
+                <el-switch v-model="form.fileUpload.open" active-color="#13ce66" inactive-color="#CDCDCD">
+                </el-switch>
+                <label class="item-hint">&emsp;如果不公开，则仅能通过文件编号检索到文件</label>
+            </el-form-item>
+
+            <el-form-item label="目标用户">
+                <el-select
+                        v-model="form.fileUpload.destUserId"
+                        filterable
+                        remote
+                        reserve-keyword
+                        placeholder="请输入用户名称关键词"
+                        :remote-method="blurSearchUsers"
+                        :loading="loading.fileUploadUserSearching">
+                    <el-option
+                            v-for="item in savedData.userList"
+                            v-if="!savedData.isLogin || item.value !== savedData.user.id"
+
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+                <br>
+                <label class="item-hint">如果选择了目标用户，则目标用户可以在我的文件中查看到此文件</label>
+            </el-form-item>
+
+            <el-form-item label="保存时长">
+                <el-select
+                        v-model="form.fileUpload.saveDays"
+                        reserve-keyword
+                        placeholder="请选择文件保存时长">
+                    <el-option
+                            v-for="item in savedData.saveDays"
+                            v-if="item.value != 3650 || savedData.isLogin"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+                <label class="item-hint">&emsp;单位：天</label>
+            </el-form-item>
+
+            <el-form-item label="下载密码">
+                <el-input placeholder="如果输入此项，下载文件时将会需要输入此密码" v-model="form.fileUpload.password" cleaable
+                          max-length="16"></el-input>
+            </el-form-item>
+
+            <el-form-item label="文件备注">
+                <el-input type="textarea"
+                          :autosize="{ minRows: 2, maxRows: 4}"
+                          placeholder="备注内容将会在文件下载时显示"
+                          v-model="form.fileUpload.attach">
+                </el-input>
+            </el-form-item>
+
+
+        </el-form>
+        <div style="display: flex; flex-direction: row-reverse;">
+            <el-button type="primary" @click="doUploadFile" :loading="loading.doFileUploadSubmitBtn">确认上传</el-button>
+        </div>
+
+    </el-dialog>
+
+    <el-dialog :title="savedData.dialogFile.name" :visible.sync="dialogVisibility.fileDetailDialog" width="40%" center>
+        <el-form :model="savedData.dialogFile">
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">
+                    文件&emsp;ID</span>
+                <span style="font-size: 14px; color: #303133">{{savedData.dialogFile.id}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">文件编号</span>
+                <span style="font-size: 14px; color: #303133">{{savedData.dialogFile.no}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">文件名称</span>
+                <span style="font-size: 14px; color: #303133">{{savedData.dialogFile.name}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">是否公开</span>
+                <span style="font-size: 14px; color: #303133">{{savedData.dialogFile.open ? '是':'否'}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">文件大小</span>
+                <span style="font-size: 14px; color: #303133">{{getFileSizeZh(savedData.dialogFile.size)}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">需要密码</span>
+                <span style="font-size: 14px; color: #CD5C5C"
+                      v-if="savedData.dialogFile.password && savedData.dialogFile.password == 'YES'">是</span>
+                <span style="font-size: 14px; color: #303133" v-else>否</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">保存时长</span>
+                <span style="font-size: 14px; color: #303133">{{savedData.dialogFile.saveDays == 3650 ? '永久':
+                    savedData.dialogFile.saveDays + ' 天'}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">上传用户</span>
+                <span style="font-size: 14px; color: #303133">{{savedData.dialogFile.user == null ? '[ 匿名用户 ]' : savedData.dialogFile.user.name}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">创建时间</span>
+                <span style="font-size: 14px; color: #303133">{{formatTime(savedData.dialogFile.gmtCreated)}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">修改时间</span>
+                <span style="font-size: 14px; color: #303133">{{formatTime(savedData.dialogFile.gmtModified)}}</span>
+            </div>
+            <div class="file-detail-item-container">
+                <span style="font-size: 14px; color: #606266; width: 120px; text-align: right; margin-right: 10px;">文件备注
+                </span>
+                <span style="font-size: 14px; color: #303133; white-space: pre-wrap; max-lines: 5;">{{savedData.dialogFile
+                    .attach == null ? '无': savedData.dialogFile
+                    .attach}}</span>
             </div>
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a role="button" style="background-color: whitesmoke">首页<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li><a role="button" onclick="showIntro()">简介</a></li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">文件<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li id="up_file_li"><a role="button" id="up_file_a" onclick="selectFile()">文件上传</a></li>
-                            <li role="separator" class="divider"></li>
 
-                            <li id="dw_file_li"><a role="button"
-                                                   onclick="showBannerInfo('alert-info', 0, '在导航栏搜索框中输入文件编号点击搜索即可', 3000, 1000, true)">文件提取</a>
-                            </li>
-                            <!--<li><a role="button" onclick="selectFile()">文件打印</a></li>-->
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="success" @click="downloadFile(savedData.dialogFile)" plain>下 载</el-button>
+            <el-button type="primary" @click="dialogVisibility.fileDetailDialog = false" plain>关 闭</el-button>
+        </div>
+    </el-dialog>
 
-                            <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>-->
-                            <li hidden="hidden"><a href="#1" class="file_up_modal" data-toggle="modal"
-                                                   data-target="#exampleModal"></a></li>
-                        </ul>
-                    </li>
-                    <li><a role="button" onclick="showPublicFile()">公开文件</a></li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">连续互通<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li id="handoff_fetch_li"><a role="button" id="handoff_fetch_a">获取文本 /Fetch</a>
-                            </li>
-                            <li role="separator" class="divider"></li>
+    <el-dialog title="文件下载保护" :visible.sync="dialogVisibility.fileDownloadPwdDialog" width="30%"
+               :close-on-click-modal="false" :close-on-press-escape="false">
+        <el-form>
+            <div style="font-size: 14px; color: #606266; margin-bottom: 15px;">文件：[ {{savedData.downloadFile.name}} ]
+                受加密保护，请输入密码
+            </div>
+            <div>
+                <el-input placeholder="请输入下载密码" v-model="savedData.downloadFilePassword" show-password></el-input>
+            </div>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="text" plain @click="confirmFileDownload" :loading="loading.checkFilePassword">确认下载
+            </el-button>
+        </div>
+    </el-dialog>
 
-                            <!--<li hidden="hidden"><a href="#1" class="file_up_modal" data-toggle="modal"-->
-                            <!--data-target="#exampleModal"></a></li>-->
-                            <li id="handoff_post_li"><a role="button" id="handoff_post_a">推送文本 /Post</a>
-                            </li>
+    <el-dialog :title="dialogVisibility.loginDialog? '用户登录': '用户注册'" :visible.sync="dialogVisibility.lrDialog"
+               width="35%" :close-on-click-modal="false" :close-on-press-escape="false" center>
+        <el-form label-width="60px">
+            <template v-if="dialogVisibility.loginDialog">
+                <el-form-item label="用户名">
+                    <el-input v-model="form.lrForm.name" maxlength="16" clearable placeholder="用户名或邮箱"></el-input>
+                </el-form-item>
+                <el-form-item label="密&emsp;码">
+                    <el-input v-model="form.lrForm.password" maxlength="16" type="password" show-password
+                              placeholder="请输入密码"></el-input>
+                </el-form-item>
+            </template>
+            <template v-else>
+                <el-form-item label="用户名">
+                    <el-input v-model="form.lrForm.name" maxlength="16" clearable placeholder="请输入用户名"></el-input>
+                </el-form-item>
+                <el-form-item label="密&emsp;码">
+                    <el-input v-model="form.lrForm.password" maxlength="16" type="password" show-password
+                              placeholder="请输入密码"></el-input>
+                    <el-input style="margin-top: 10px;" v-model="form.lrForm.password2" maxlength="16" type="password"
+                              show-password
+                              placeholder="请再输入一遍密码"></el-input>
+                </el-form-item>
+            </template>
+        </el-form>
+        <div v-if="dialogVisibility.loginDialog" slot="footer" class="dialog-footer">
+            <el-button type="text" plain @click="dialogVisibility.loginDialog = false">去注册
+            </el-button>
+            <el-button type="primary" plain @click="doLogin" :loading="loading.loginLoading">登录
+            </el-button>
+        </div>
+        <div v-else slot="footer" class="dialog-footer">
+            <el-button type="text" plain @click="dialogVisibility.loginDialog = true">去登录
+            </el-button>
+            <el-button type="success" plain @click="confirmFileDownload" :loading="loading.checkFilePassword">注册
+            </el-button>
+        </div>
 
-                            <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>-->
-
-                        </ul>
-                    </li>
-
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">小游戏<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a role="button" id="go_stroke">自动一笔画</a>
-                            </li>
-                        </ul>
-                    </li>
+    </el-dialog>
 
 
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">工具<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a role="button" id="mybatis">mybatis逆向工程</a>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
-
-                <form class="navbar-form navbar-left">
-                    <!--<div class="form-group">-->
-                    <!--<input type="text" class="form-control search-box" placeholder="Search">-->
-                    <!--&lt;!&ndash;多加一个input禁止默认的回车提交表单&ndash;&gt;-->
-                    <!--</div>-->
-                    <!--<button type="button"  class="btn btn-default search-btn">搜索</button>-->
-                    <div class="input-group">
-                        <input type="text" class="form-control search-box" placeholder="Search for...">
-                        <input style="display:none">
-                        <span class="input-group-btn">
-                             <button class="btn btn-default search-btn" type="button"
-                                     onsubmit="return false;">搜索</button>
-                        </span>
-                    </div>
-                </form>
-
-                <ul class="nav navbar-nav" style="width: 600px; height: 50px">
-                    <li style="width: 100%">
-                        <div class="progress" style="margin-top: 15px; width: 100%;" hidden="hidden">
-                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar"
-                                 aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0">
-                                <!--<span class="sr-only">45% Complete</span>-->
+    <el-container>
+        <el-header>
+            <el-menu :default-active="currentActiveIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+                <el-menu-item index="1">
+            <span style="text-align: center; display: flex; justify-content: center; align-items: center; height: inherit">
+                <el-image style="width: 30px; height: 30px; border-radius: 15px;"
+                          src="https://tva1.sinaimg.cn/large/0081Kckwgy1glz5atqfpsj30u00u0jwc.jpg"
+                          fit="cover"></el-image>
+            </span>
+                </el-menu-item>
+                <el-submenu index="2">
+                    <template slot="title">文件中转</template>
+                    <el-menu-item index="2-1">首页</el-menu-item>
+                    <el-menu-item index="2-2">使用帮助</el-menu-item>
+                </el-submenu>
+                <el-menu-item index="3">备忘录</el-menu-item>
+                <el-menu-item index="4">好友</el-menu-item>
+                <el-menu-item index="5">一笔画</el-menu-item>
+                <el-submenu v-if="savedData.isLogin" index="6" style="float: right;">
+                    <template slot="title"><span style="color: #CDAA7D">欢迎您，{{savedData.user.name}}</span></template>
+                    <el-menu-item index="6-1" style="color: #721c24">退出登录</el-menu-item>
+                </el-submenu>
+                <el-menu-item v-if="!savedData.isLogin" index="7" style="float: right; color: #1E90FF;">登录 / 注册
+                </el-menu-item>
+            </el-menu>
+        </el-header>
+        <el-main>
+            <div v-if="currentActiveIndex == '2-1' || currentActiveIndex == '2-2'">
+                <!--文件视图-->
+                <el-container>
+                    <el-aside width="360px">
+                        <div class="file-header">文件上传</div>
+                        <div>
+                            <el-upload
+                                    drag
+                                    action="https://jsonplaceholder.typicode.com/posts/"
+                                    multiple
+                                    ref="fileUpload"
+                                    :auto-upload="false"
+                                    :http-request="customFileUpload"
+                                    :on-remove="onFileUploadListChange"
+                                    :on-change="onFileUploadListChange">
+                                <i class="el-icon-upload"></i>
+                                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                                <div class="el-upload__tip" slot="tip">文件总大小不超过1G</div>
+                            </el-upload>
+                            <div v-if="dialogVisibility.fileUploadBtn" style="margin-top: 10px;">
+                                <el-button type="primary" size="mini" plain @click="displayFileUploadOptDialog(true)">
+                                    上传
+                                    <i class="el-icon-upload el-icon--right"></i>
+                                </el-button>
                             </div>
                         </div>
-                    </li>
-                </ul>
+                        <div class="file-header" style="margin-top: 10px;">我的文件
+                            <span v-if="!loading.userFileList" style="color: #0f81cc; cursor: pointer;"
+                                  @click="fetchOrResetMyFileList"><i
+                                    class="el-icon-refresh"></i>
+                            </span>
+                            <span v-if="loading.userFileList" style="color: #0f81cc"><i class="el-icon-loading"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <div v-if="!savedData.isLogin" style="text-align: center; margin-top: 50px;">
+                                <!--没有登录-->
+                                <img th:src="@{/img/un-login.png}" style="width: 250px; object-fit: cover;">
+                                <div>
+                                    <span style="color: #1E90FF; font-size: 13px; margin-top: 20px; cursor: pointer;"
+                                          @click="dialogVisibility.lrDialog = true">登录</span>
+                                    <span style="color: #909399; font-size: 13px; margin-top: 20px;">以查看您的文件</span>
+                                </div>
+                            </div>
+                            <div v-else style="text-align: center;">
+                                <!--登录了-->
+                                <div v-if="!savedData.userFileList || Object.keys(savedData.userFileList).length == 0"
+                                     style="text-align: center; margin-top: 50px;">
+                                    <!--没有登录-->
+                                    <img th:src="@{/img/no-data.png}" style="width: 180px; object-fit: cover;">
+                                    <div>
+                                        <span style="color: #909399; font-size: 13px; margin-top: 20px;">您还没有上传或收到过文件
+                                        </span>
+                                    </div>
+                                </div>
+                                <div v-else style="text-align: left; max-height: 400px; overflow-y: scroll;">
+                                    <el-timeline style="padding-left: 0 !important;">
 
-                <ul class="nav navbar-nav navbar-right">
+                                        <template v-for="(fileList, timeStr) in savedData.userTimedFileListMap">
+                                            <el-timeline-item :timestamp="timeStr" placement="top">
+                                                <template v-for="file in fileList">
+                                                    <div style="margin-bottom: 10px; display: flex;
+                                                        justify-items: center; padding: 5px; align-items: center">
+                                                        <span v-if="file.user&& savedData.user.id == file.user.id"
+                                                              style="margin-right: 5px;">
+                                                            <el-tag type="success" size="small">发送</el-tag>
+                                                        </span>
+                                                        <span v-if="file.destUser && savedData.user.id == file.destUser.id"
+                                                              style="margin-right: 5px;">
+                                                            <el-tag type="danger" size="small">接收</el-tag>
+                                                        </span>
+                                                        <span>
+                                                                <img :src="calFilePath(file.name)"
+                                                                     style="width: 20px; margin-right: 5px;">
+                                                            </span>
+                                                        <span>{{file.name}}</span>
+                                                    </div>
+                                                </template>
+                                            </el-timeline-item>
+                                        </template>
+                                    </el-timeline>
+                                </div>
+                            </div>
+                        </div>
+                    </el-aside>
+                    <el-main style="padding-top: 0 !important;">
+                        <div class="file-header">文件站&nbsp;
+                            <span v-if="!loading.fileList" style="color: #0f81cc; cursor: pointer;"
+                                  @click="refreshFileList"><i
+                                    class="el-icon-refresh"></i>
+                            </span>
+                            <span v-if="loading.fileList" style="color: #0f81cc"><i class="el-icon-loading"></i>
+                            </span>
+                            <span>
+                                <el-input prefix-icon="el-icon-search" placeholder="输入文件名称或编号搜索"
+                                          v-model="form.filePageParam.searchKey" @input="blurSearchFile"
+                                          clearable style="display: inline-block;margin-top: 15px;">
+                            </el-input>
+                            </span>
 
-                    <li class="dropdown">
-                        <a id="personal-center" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                           aria-haspopup="true" aria-expanded="false">个人中心<span class="caret"></span></a>
+                        </div>
+                        <div>
+                            <el-row :gutter="10" v-loading="loading.fileList"
+                                    style="max-height: 700px; overflow-y: auto; display: flex; flex-wrap: wrap;
+                                    flex-direction: row">
+                                <template v-for="file in savedData.fileList">
+                                    <el-col
+                                            :span="form.filePageParam.pageSize == 12 ? 6 : (form.filePageParam.pageSize == 24 ? 6: 4)">
+                                        <div style="margin-bottom: 10px;">
+                                            <el-card :body-style="{ 'padding-top': '14px' }" shadow="hover">
+                                                <div style="display: flex; flex-direction: row; justify-items: center;">
+                                                    <span>
+                                                        <el-image
+                                                                v-if="isImage(file)"
+                                                                style="width: 40px; height: 40px; border-radius: 3px;"
+                                                                :src="'https://cos.iutr.cn/'+ file.bucketId"
+                                                                fix="cover"
+                                                                :preview-src-list="['https://cos.iutr.cn/'+ file.bucketId]">
+                                                        </el-image>
+                                                        <img :src="calFilePath(file.name)" class="file-thumbnail"
+                                                             v-else>
+                                                    </span>
+                                                    <span style="margin-left: 10px; max-lines: 2;
+                                                text-overflow: ellipsis;overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical;-webkit-line-clamp:2; ">
+                                                        <el-tooltip
+                                                                effect="dark"
+                                                                :content="file.name"
+                                                                placement="top-start">
+                                                        <span style="font-size: 14px;">{{file.name}}
+                                                        </span>
+                                                        </el-tooltip>
+                                                    </span>
+                                                </div>
+                                                <div style="padding: 5px 0 0 8px;">
+                                                    <div style="font-size: 14px; color: #409EFF"><span
+                                                            class="file-info-title">作&emsp;&emsp;者：
+                                                    </span>{{file.user == null ? '匿名' : file.user.name}}
+                                                    </div>
+                                                    <div>
+                                                        <span class="file-info-title">文件属性：</span>
+                                                        <span v-if="fileHasPassword(file)">
+                                                            <el-tag type="danger" size="mini">加密</el-tag>
+                                                        </span>
+                                                        <span
+                                                                v-if="savedData.isLogin && file.user && file.user.id == savedData.user.id">
+                                                            <el-tag size="mini">我上传的</el-tag>
+                                                        </span>
+                                                        <span
+                                                                v-if="savedData.isLogin && file.destUser && file.destUser.id == savedData.user.id">
+                                                            <el-tag type="success" size="mini">发给我的</el-tag>
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="file-info-title">上传时间：</span>
+                                                        <span style="font-size: 14px; margin-top: 5px;">
+                                                            {{formatTime(file.gmtCreated)}}</span>
+                                                    </div>
 
-                        <ul class="dropdown-menu">
-                            <li id="li-login"><a role="button" onclick="showLRHeader(1)">登录</a></li>
-                            <li id="li-personal-center" style="display: none"><a role="button"
-                                                                                 onclick="goPersonalCenter()"
-                                                                                 id="into-personal-center">进入个人中心</a>
-                            </li>
-                            <li role="separator" class="divider"></li>
-                            <li id="li-register"><a role="button" onclick="showLRHeader(0)">注册</a></li>
-                            <li id="li-login-out" style="display: none"><a role="button" onclick="login_out()">注销登录</a>
-                            </li>
-                        </ul>
-                    </li>
+                                                    <div class="bottom clearfix">
+                                                        <!--                                                        <time class="time">{{ currentDate }}</time>-->
+                                                        <!--                                                        <el-button type="text" class="button" v-if="isImage(file)"-->
+                                                        <!--                                                                   @click="downloadFile(file)">预览-->
+                                                        <!--                                                        </el-button>-->
+                                                        <el-button type="text" class="button"
+                                                                   @click="downloadFile(file)">下载
+                                                        </el-button>
+                                                        <el-button type="text" class="button" style="float: right"
+                                                                   @click="handleDisplayFileDetail(file)">
+                                                            更多信息
+                                                        </el-button>
+                                                    </div>
+                                                </div>
+                                            </el-card>
+                                        </div>
+                                    </el-col>
+                                </template>
+                            </el-row>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <el-pagination
+                                    background
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    :current-page="form.filePageParam.currentPage"
+                                    :page-sizes="[12, 24, 48, 120]"
+                                    :page-size="form.filePageParam.pageSize"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="form.filePageParam.totalSize">
+                            </el-pagination>
+                        </div>
+                    </el-main>
+                </el-container>
+            </div>
+        </el-main>
+<!--        <el-footer>Footer</el-footer>-->
+    </el-container>
 
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">其他<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a role="button" onclick="showHelp()">帮助</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a role="button" onclick="showAuthor()">关于</a></li>
-                            <script type="text/javascript">
-                                function showHelp() {
-                                    $(".btn-show-help").click();
-                                }
-
-                                function showAuthor() {
-                                    alert("如有您有任何问题或者建议，可以发送邮件至：  \n\n\t1172714116@qq.com | im.lqs2@icloud.com \n\n或者添加\n\n\tQQ: 1172714116 \t微信: Xia03090709\n\n与我联系, 感谢您的使用。");
-                                }
-                            </script>
-                            <!--<li><a role="button">Another action</a></li>-->
-                            <!--<li><a role="button">Something else here</a></li>-->
-                            <!--<li role="separator" class="divider"></li>-->
-                            <!--<li><a role="button">Separated link</a></li>-->
-                        </ul>
-                    </li>
-                </ul>
-            </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-    </nav>
-
-    <div class="jumbotron d_title" style="display: none">
-        <h1>一身诗意千寻瀑</h1>
-        <p>
-            这里是简介，但是我还没想好，就先放着吧
-        </p>
-        <p><a class="btn btn-primary btn-lg" role="button">告诉我你的创意</a></p>
+    <div class="footer">
+        <div class="foot">&copy;2020-NaN 张峥润 All Rights Reserved.
+            <el-button type="text">苏ICP备18036117号-4</el-button>
+        </div>
     </div>
 
-    <div class="lr_div_container" style="color: white">
-        <div class="lr_div_middle" style="display: none"></div>
-
-        <div class="login_div" style="display: none">
-            <div class="pull-right" style="margin-right: 80px">
-                <button class="btn btn-info" onclick="slideUpL()">&nbsp;收&nbsp;起&nbsp;</button>
-            </div>
-            <div class="page-header" style="margin-left: 50px">
-                <h1>登录^
-                    <small style="color: white">darkme.cn</small>
-                </h1>
-            </div>
-
-            <div style="width: 30%; margin: 0 0 20px 100px">
-                <form>
-                    <div class="form-group">
-                        <label for="l_InputUserName">用户名</label>
-                        <input type="text" class="form-control l-un" id="l_InputUserName" placeholder="用户名/邮箱">
-                    </div>
-                    <div class="form-group">
-                        <label for="l_InputPassword1">密码</label>
-                        <input type="password" class="form-control l-up" id="l_InputPassword1" placeholder="还记得密码么">
-                    </div>
-                    <!--<div class="form-group">-->
-                    <!--<label for="exampleInputFile">File input</label>-->
-                    <!--<input type="file" id="exampleInputFile">-->
-                    <!--<p class="help-block">Example block-level help text here.</p>-->
-                    <!--</div>-->
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" class="l-ur">在15天内记住我好吗
-                        </label>
-                    </div>
-                    <button type="button" onsubmit="return false;" class="btn btn-primary l-btn">&emsp;登&emsp;录&emsp;
-                    </button>
-                </form>
-            </div>
-        </div>
-        <div class="register_div" style="display: none">
-
-            <div class="pull-right" style="margin-right: 80px">
-                <button class="btn btn-info" onclick="slideUpR()">&nbsp;收&nbsp;起&nbsp;</button>
-            </div>
-            <div class="page-header" style="margin-left: 50px">
-                <h1>注册^
-                    <small style="color: white">darkme.cn</small>
-                </h1>
-            </div>
-
-            <div style="width: 30%; margin: 0 0 20px 100px">
-                <form>
-                    <div class="form-group has-feedback r-un-div">
-                        <label for="r_InputUserName">用户名</label>
-                        <input type="text" class="form-control r-un" id="r_InputUserName"
-                               placeholder="长度2-16个字符 (@符号禁止使用)">
-                        <span class="glyphicon form-control-feedback r-un-s" aria-hidden="true"></span>
-                    </div>
-                    <div class="form-group has-feedback r-up-div">
-                        <label for="r_InputPassword1">密码</label>
-                        <input type="password" class="form-control r-up" id="r_InputPassword1"
-                               placeholder="长度6-16位">
-                        <span class="glyphicon form-control-feedback r-up-s" aria-hidden="true"></span>
-                    </div>
-                    <div class="form-group has-feedback r-ue-div">
-                        <label for="exampleInputEmail1">邮箱</label>
-                        <input type="email" class="form-control r-ue" id="exampleInputEmail1"
-                               placeholder="[可选]可用于登录/找回密码，若留空请牢记您的用户名和密码">
-                        <span class="glyphicon form-control-feedback r-ue-s" aria-hidden="true"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="radio-inline">
-                            <input type="radio" name="r-sex-radio-group" id="r-sex-radio-0" value="0" checked="checked">男</label>
-                        <label class="radio-inline">
-                            <input type="radio" name="r-sex-radio-group" id="r-sex-radio-1" value="1"> 女
-                        </label>
-                    </div>
-                    <button type="button" onsubmit="return false;" class="btn btn-default r-btn">&emsp;注&emsp;册&emsp;
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    <div>
-
-        <button type="button" class="btn btn-primary btn-lg btn-show-help" data-toggle="modal" data-target="#myModal"
-                style="display: none"></button>
-
-        <!-- Modal -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">帮助</h4>
-                    </div>
-                    <div class="modal-body well-large">
-                        <p class="lead">
-                        <ul>
-                            <li>文件功能
-                                <ul>
-                                    <li>未登录可用作文件中转，文件编号有效期：1（单位：天）</li>
-                                    <li>登录后文件长期保存，有效期：>10（单位：年）</li>
-                                </ul>
-                            </li>
-                            <li>便签
-                                <ul>
-                                    <li>登录后使用，永久保存</li>
-                                    <li>使用细节：无</li>
-                                </ul>
-                            </li>
-                            <li>好友
-                                <ul>
-                                    <li>发消息，加好友，传文件</li>
-                                </ul>
-                            </li>
-                            <li>消息
-                                <ul>
-                                    <li>简单消息的发送与接收</li>
-                                </ul>
-                            </li>
-                        </ul>
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <!--<button type="button" class="btn btn-primary">Save changes</button>-->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main">
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-            <div class="middle-info-div"></div>
-
-            <div>
-                <div style="display: none">
-                    <input type="file" id="file" class="file" onchange="upload_file_attachment()"
-                           style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;"/>
-                    <p id="handoff_text_input" style="display: none"></p>
-                    <button class="btn_copy" data-clipboard-target="#handoff_text_input" style="display: none"></button>
-                </div>
-
-            </div>
-
-
-            <div class="right_info_area"></div>
-
-
-            <div id="frame-div-container" style="color: black; display: none">
-                <div class="pull-left">
-                    <h1 style="color: #fff;">个人中心
-                        <small><em class="self" style="color: #fff;">darkme.cn</em></small>
-                    </h1>
-                </div>
-                <br>
-                <!--<h1 class="personal-center-title">Dark<small>个人中心</small></h1>-->
-                <hr style="border: 0.1vh solid #D5D5D5; width: 100%">
-
-                <iframe id="middle-frame" width="100%" height="100%" th:allowtransparency="true" frameborder="0"
-                        style="display:none" onload="this.style.display = 'block';" src="/hello"></iframe>
-                <!--</div>-->
-                <!--</div>-->
-            </div>
-
-        </div>
-        <div class="footer">
-            <div class="foot text-center" onclick="showEgg()">&copy;2018-2019 LSS All Rights Reserved. 苏ICP备 18036117号-1
-            </div>
-            <script type="text/javascript">
-                function showEgg() {
-                    alert("zzz...");
-                }
-            </script>
-        </div>
-        <!--<div class="foot center-block">&copy;2017-2018 LS2.All Rights Reserved.</div>-->
-    </div>
 </div>
+<script type="text/javascript" th:src="@{/js/my-index.js}"></script>
+<!--<div class="container-fluid" style="padding: 0">-->
+
+<!--    <nav class="navbar navbar-default navbar-fixed-top navbar-has-shadow" style="background: whitesmoke">-->
+<!--        <div class="container-fluid">-->
+<!--            &lt;!&ndash; Brand and toggle get grouped for better mobile display &ndash;&gt;-->
+<!--            <div class="navbar-header">-->
+<!--                &lt;!&ndash;<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"&ndash;&gt;-->
+<!--                &lt;!&ndash;data-target="#bs-example-navbar-collapse-1" aria-expanded="false">&ndash;&gt;-->
+<!--                &lt;!&ndash;<span class="sr-only">Toggle navigation</span>&ndash;&gt;-->
+<!--                &lt;!&ndash;<span class="icon-bar"></span>&ndash;&gt;-->
+<!--                &lt;!&ndash;<span class="icon-bar"></span>&ndash;&gt;-->
+<!--                &lt;!&ndash;<span class="icon-bar"></span>&ndash;&gt;-->
+<!--                &lt;!&ndash;</button>&ndash;&gt;-->
+<!--                <a class="navbar-brand" href="#" onclick="makeEgg()">-->
+<!--                    &lt;!&ndash;<span class="brand_icon ico"></span>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<span class="brand_icon glyphicon glyphicon-grain"></span>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<img src="/static/pic.png">&ndash;&gt;-->
+
+<!--                    <img th:src="@{/pic.png}" style="width: 20px; height: 20px;">-->
+<!--                    <script type="text/javascript">-->
+<!--                        function makeEgg() {-->
+<!--                            alert("点我干啥");-->
+<!--                        }-->
+<!--                    </script>-->
+<!--                </a>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Collect the nav links, forms, and other content for toggling &ndash;&gt;-->
+<!--            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">-->
+<!--                <ul class="nav navbar-nav">-->
+<!--                    <li class="active"><a role="button" style="background-color: whitesmoke">首页<span class="sr-only">(current)</span></a>-->
+<!--                    </li>-->
+<!--                    <li><a role="button" onclick="showIntro()">简介</a></li>-->
+<!--                    <li class="dropdown">-->
+<!--                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
+<!--                           aria-expanded="false">文件<span class="caret"></span></a>-->
+<!--                        <ul class="dropdown-menu">-->
+<!--                            <li id="up_file_li"><a role="button" id="up_file_a" onclick="selectFile()">文件上传</a></li>-->
+<!--                            <li role="separator" class="divider"></li>-->
+
+<!--                            <li id="dw_file_li"><a role="button"-->
+<!--                                                   onclick="showBannerInfo('alert-info', 0, '在导航栏搜索框中输入文件编号点击搜索即可', 3000, 1000, true)">文件提取</a>-->
+<!--                            </li>-->
+<!--                            &lt;!&ndash;<li><a role="button" onclick="selectFile()">文件打印</a></li>&ndash;&gt;-->
+
+<!--                            &lt;!&ndash;<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>&ndash;&gt;-->
+<!--                            <li hidden="hidden"><a href="#1" class="file_up_modal" data-toggle="modal"-->
+<!--                                                   data-target="#exampleModal"></a></li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+<!--                    <li><a role="button" onclick="showPublicFile()">公开文件</a></li>-->
+<!--                    <li class="dropdown">-->
+<!--                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
+<!--                           aria-expanded="false">连续互通<span class="caret"></span></a>-->
+<!--                        <ul class="dropdown-menu">-->
+<!--                            <li id="handoff_fetch_li"><a role="button" id="handoff_fetch_a">获取文本 /Fetch</a>-->
+<!--                            </li>-->
+<!--                            <li role="separator" class="divider"></li>-->
+
+<!--                            &lt;!&ndash;<li hidden="hidden"><a href="#1" class="file_up_modal" data-toggle="modal"&ndash;&gt;-->
+<!--                            &lt;!&ndash;data-target="#exampleModal"></a></li>&ndash;&gt;-->
+<!--                            <li id="handoff_post_li"><a role="button" id="handoff_post_a">推送文本 /Post</a>-->
+<!--                            </li>-->
+
+<!--                            &lt;!&ndash;<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>&ndash;&gt;-->
+
+<!--                        </ul>-->
+<!--                    </li>-->
+
+<!--                    <li class="dropdown">-->
+<!--                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
+<!--                           aria-expanded="false">小游戏<span class="caret"></span></a>-->
+<!--                        <ul class="dropdown-menu">-->
+<!--                            <li><a role="button" id="go_stroke">自动一笔画</a>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+
+
+<!--                    <li class="dropdown">-->
+<!--                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
+<!--                           aria-expanded="false">工具<span class="caret"></span></a>-->
+<!--                        <ul class="dropdown-menu">-->
+<!--                            <li><a role="button" id="mybatis">mybatis逆向工程</a>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+
+<!--                </ul>-->
+
+<!--                <form class="navbar-form navbar-left">-->
+<!--                    &lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+<!--                    &lt;!&ndash;<input type="text" class="form-control search-box" placeholder="Search">&ndash;&gt;-->
+<!--                    &lt;!&ndash;&lt;!&ndash;多加一个input禁止默认的回车提交表单&ndash;&gt;&ndash;&gt;-->
+<!--                    &lt;!&ndash;</div>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<button type="button"  class="btn btn-default search-btn">搜索</button>&ndash;&gt;-->
+<!--                    <div class="input-group">-->
+<!--                        <input type="text" class="form-control search-box" placeholder="Search for...">-->
+<!--                        <input style="display:none">-->
+<!--                        <span class="input-group-btn">-->
+<!--                             <button class="btn btn-default search-btn" type="button"-->
+<!--                                     onsubmit="return false;">搜索</button>-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                </form>-->
+
+<!--                <ul class="nav navbar-nav" style="width: 600px; height: 50px">-->
+<!--                    <li style="width: 100%">-->
+<!--                        <div class="progress" style="margin-top: 15px; width: 100%;" hidden="hidden">-->
+<!--                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar"-->
+<!--                                 aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0">-->
+<!--                                &lt;!&ndash;<span class="sr-only">45% Complete</span>&ndash;&gt;-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </li>-->
+<!--                </ul>-->
+
+<!--                <ul class="nav navbar-nav navbar-right">-->
+
+<!--                    <li class="dropdown">-->
+<!--                        <a id="personal-center" class="dropdown-toggle" data-toggle="dropdown" role="button"-->
+<!--                           aria-haspopup="true" aria-expanded="false">个人中心<span class="caret"></span></a>-->
+
+<!--                        <ul class="dropdown-menu">-->
+<!--                            <li id="li-login"><a role="button" onclick="showLRHeader(1)">登录</a></li>-->
+<!--                            <li id="li-personal-center" style="display: none"><a role="button"-->
+<!--                                                                                 onclick="goPersonalCenter()"-->
+<!--                                                                                 id="into-personal-center">进入个人中心</a>-->
+<!--                            </li>-->
+<!--                            <li role="separator" class="divider"></li>-->
+<!--                            <li id="li-register"><a role="button" onclick="showLRHeader(0)">注册</a></li>-->
+<!--                            <li id="li-login-out" style="display: none"><a role="button" onclick="login_out()">注销登录</a>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+
+<!--                    <li class="dropdown">-->
+<!--                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
+<!--                           aria-expanded="false">其他<span class="caret"></span></a>-->
+<!--                        <ul class="dropdown-menu">-->
+<!--                            <li><a role="button" onclick="showHelp()">帮助</a></li>-->
+<!--                            <li role="separator" class="divider"></li>-->
+<!--                            <li><a role="button" onclick="showAuthor()">关于</a></li>-->
+<!--                            <script type="text/javascript">-->
+<!--                                function showHelp() {-->
+<!--                                    $(".btn-show-help").click();-->
+<!--                                }-->
+
+<!--                                function showAuthor() {-->
+<!--                                    alert("如有您有任何问题或者建议，可以发送邮件至：  \n\n\t1172714116@qq.com | im.lqs2@icloud.com \n\n或者添加\n\n\tQQ: 1172714116 \t微信: Xia03090709\n\n与我联系, 感谢您的使用。");-->
+<!--                                }-->
+<!--                            </script>-->
+<!--                            &lt;!&ndash;<li><a role="button">Another action</a></li>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<li><a role="button">Something else here</a></li>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<li role="separator" class="divider"></li>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<li><a role="button">Separated link</a></li>&ndash;&gt;-->
+<!--                        </ul>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </div>&lt;!&ndash; /.navbar-collapse &ndash;&gt;-->
+<!--        </div>&lt;!&ndash; /.container-fluid &ndash;&gt;-->
+<!--    </nav>-->
+
+<!--    <div class="jumbotron d_title" style="display: none">-->
+<!--        <h1>一身诗意千寻瀑</h1>-->
+<!--        <p>-->
+<!--            这里是简介，但是我还没想好，就先放着吧-->
+<!--        </p>-->
+<!--        <p><a class="btn btn-primary btn-lg" role="button">告诉我你的创意</a></p>-->
+<!--    </div>-->
+
+<!--    <div class="lr_div_container" style="color: white">-->
+<!--        <div class="lr_div_middle" style="display: none"></div>-->
+
+<!--        <div class="login_div" style="display: none">-->
+<!--            <div class="pull-right" style="margin-right: 80px">-->
+<!--                <button class="btn btn-info" onclick="slideUpL()">&nbsp;收&nbsp;起&nbsp;</button>-->
+<!--            </div>-->
+<!--            <div class="page-header" style="margin-left: 50px">-->
+<!--                <h1>登录^-->
+<!--                    <small style="color: white">darkme.cn</small>-->
+<!--                </h1>-->
+<!--            </div>-->
+
+<!--            <div style="width: 30%; margin: 0 0 20px 100px">-->
+<!--                <form>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="l_InputUserName">用户名</label>-->
+<!--                        <input type="text" class="form-control l-un" id="l_InputUserName" placeholder="用户名/邮箱">-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="l_InputPassword1">密码</label>-->
+<!--                        <input type="password" class="form-control l-up" id="l_InputPassword1" placeholder="还记得密码么">-->
+<!--                    </div>-->
+<!--                    &lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+<!--                    &lt;!&ndash;<label for="exampleInputFile">File input</label>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<input type="file" id="exampleInputFile">&ndash;&gt;-->
+<!--                    &lt;!&ndash;<p class="help-block">Example block-level help text here.</p>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</div>&ndash;&gt;-->
+<!--                    <div class="checkbox">-->
+<!--                        <label>-->
+<!--                            <input type="checkbox" class="l-ur">在15天内记住我好吗-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <button type="button" onsubmit="return false;" class="btn btn-primary l-btn">&emsp;登&emsp;录&emsp;-->
+<!--                    </button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="register_div" style="display: none">-->
+
+<!--            <div class="pull-right" style="margin-right: 80px">-->
+<!--                <button class="btn btn-info" onclick="slideUpR()">&nbsp;收&nbsp;起&nbsp;</button>-->
+<!--            </div>-->
+<!--            <div class="page-header" style="margin-left: 50px">-->
+<!--                <h1>注册^-->
+<!--                    <small style="color: white">darkme.cn</small>-->
+<!--                </h1>-->
+<!--            </div>-->
+
+<!--            <div style="width: 30%; margin: 0 0 20px 100px">-->
+<!--                <form>-->
+<!--                    <div class="form-group has-feedback r-un-div">-->
+<!--                        <label for="r_InputUserName">用户名</label>-->
+<!--                        <input type="text" class="form-control r-un" id="r_InputUserName"-->
+<!--                               placeholder="长度2-16个字符 (@符号禁止使用)">-->
+<!--                        <span class="glyphicon form-control-feedback r-un-s" aria-hidden="true"></span>-->
+<!--                    </div>-->
+<!--                    <div class="form-group has-feedback r-up-div">-->
+<!--                        <label for="r_InputPassword1">密码</label>-->
+<!--                        <input type="password" class="form-control r-up" id="r_InputPassword1"-->
+<!--                               placeholder="长度6-16位">-->
+<!--                        <span class="glyphicon form-control-feedback r-up-s" aria-hidden="true"></span>-->
+<!--                    </div>-->
+<!--                    <div class="form-group has-feedback r-ue-div">-->
+<!--                        <label for="exampleInputEmail1">邮箱</label>-->
+<!--                        <input type="email" class="form-control r-ue" id="exampleInputEmail1"-->
+<!--                               placeholder="[可选]可用于登录/找回密码，若留空请牢记您的用户名和密码">-->
+<!--                        <span class="glyphicon form-control-feedback r-ue-s" aria-hidden="true"></span>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="radio-inline">-->
+<!--                            <input type="radio" name="r-sex-radio-group" id="r-sex-radio-0" value="0" checked="checked">男</label>-->
+<!--                        <label class="radio-inline">-->
+<!--                            <input type="radio" name="r-sex-radio-group" id="r-sex-radio-1" value="1"> 女-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <button type="button" onsubmit="return false;" class="btn btn-default r-btn">&emsp;注&emsp;册&emsp;-->
+<!--                    </button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
+<!--    <div>-->
+
+<!--        <button type="button" class="btn btn-primary btn-lg btn-show-help" data-toggle="modal" data-target="#myModal"-->
+<!--                style="display: none"></button>-->
+
+<!--        &lt;!&ndash; Modal &ndash;&gt;-->
+<!--        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">-->
+<!--            <div class="modal-dialog" role="document">-->
+<!--                <div class="modal-content">-->
+<!--                    <div class="modal-header">-->
+<!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span-->
+<!--                                aria-hidden="true">&times;</span></button>-->
+<!--                        <h4 class="modal-title" id="myModalLabel">帮助</h4>-->
+<!--                    </div>-->
+<!--                    <div class="modal-body well-large">-->
+<!--                        <p class="lead">-->
+<!--                        <ul>-->
+<!--                            <li>文件功能-->
+<!--                                <ul>-->
+<!--                                    <li>未登录可用作文件中转，文件编号有效期：1（单位：天）</li>-->
+<!--                                    <li>登录后文件长期保存，有效期：>10（单位：年）</li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                            <li>便签-->
+<!--                                <ul>-->
+<!--                                    <li>登录后使用，永久保存</li>-->
+<!--                                    <li>使用细节：无</li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                            <li>好友-->
+<!--                                <ul>-->
+<!--                                    <li>发消息，加好友，传文件</li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                            <li>消息-->
+<!--                                <ul>-->
+<!--                                    <li>简单消息的发送与接收</li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                    <div class="modal-footer">-->
+<!--                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>-->
+<!--                        &lt;!&ndash;<button type="button" class="btn btn-primary">Save changes</button>&ndash;&gt;-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="main">-->
+<!--            &lt;!&ndash;&lt;!&ndash;</div>&ndash;&gt;&ndash;&gt;-->
+
+<!--            <div class="middle-info-div"></div>-->
+
+<!--            <div>-->
+<!--                <div style="display: none">-->
+<!--                    <input type="file" id="file" class="file" onchange="upload_file_attachment()"-->
+<!--                           style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;"/>-->
+<!--                    <p id="handoff_text_input" style="display: none"></p>-->
+<!--                    <button class="btn_copy" data-clipboard-target="#handoff_text_input" style="display: none"></button>-->
+<!--                </div>-->
+
+<!--            </div>-->
+
+
+<!--            <div class="right_info_area"></div>-->
+
+
+<!--            <div id="frame-div-container" style="color: black; display: none">-->
+<!--                <div class="pull-left">-->
+<!--                    <h1 style="color: #fff;">个人中心-->
+<!--                        <small><em class="self" style="color: #fff;">darkme.cn</em></small>-->
+<!--                    </h1>-->
+<!--                </div>-->
+<!--                <br>-->
+<!--                &lt;!&ndash;<h1 class="personal-center-title">Dark<small>个人中心</small></h1>&ndash;&gt;-->
+<!--                <hr style="border: 0.1vh solid #D5D5D5; width: 100%">-->
+
+<!--                <iframe id="middle-frame" width="100%" height="100%" th:allowtransparency="true" frameborder="0"-->
+<!--                        style="display:none" onload="this.style.display = 'block';" src="/hello"></iframe>-->
+<!--                &lt;!&ndash;</div>&ndash;&gt;-->
+<!--                &lt;!&ndash;</div>&ndash;&gt;-->
+<!--            </div>-->
+
+<!--        </div>-->
+
+<!--<div class="foot center-block">&copy;2017-2018 LS2.All Rights Reserved.</div>-->
+<!--</div>-->
 
 </body>
 </html>

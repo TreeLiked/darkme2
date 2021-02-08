@@ -1,4 +1,7 @@
 spring:
+  mvc:
+    favicon:
+      enabled: false
   thymeleaf:
     cache: false
     mode: HTML
@@ -16,7 +19,7 @@ spring:
       # 格式化输出
       indent-output: true
       # 格式化日期
-    date-format: yyyy-MM-dd HH:mm
+    date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
     parser:
       # 允许不存在的属性
@@ -25,11 +28,11 @@ spring:
 server:
   servlet:
     context-path: /
-  port: 443
+  port: 30001
   ssl:
     enabled: true
-    key-store: classpath:www.darkme.cn.jks
-    key-store-password: liu666.090797
+    key-store: classpath:4985895_zzr.iutr.cn.jks
+    key-store-password: R0G67rG9
     key-store-type: JKS
 
 cos:
@@ -48,3 +51,11 @@ my:
     gen-dir: /Users/lqs2/Desktop/mybatis/gen/
     zip-dir: /Users/lqs2/Desktop/mybatis/zip/
     map-dir: file:/Users/lqs2/Desktop/mybatis/zip/
+
+
+logging:
+  level:
+    com:
+      treeliked:
+        darkme2:
+          dao: debug

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.treeliked.darkme2.dao.MemoMapper">
+  <resultMap id="BaseResultMap" type="com.treeliked.darkme2.dataobject.MemoPO">
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="Title" jdbcType="VARCHAR" property="title" />
+    <result column="Content" jdbcType="VARCHAR" property="content" />
+    <result column="Statue" jdbcType="SMALLINT" property="statue" />
+    <result column="UserId" jdbcType="VARCHAR" property="userId" />
+    <result column="GmtCreated" jdbcType="TIMESTAMP" property="gmtCreated" />
+    <result column="GmtModified" jdbcType="TIMESTAMP" property="gmtModified" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from Memo
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.treeliked.darkme2.dataobject.MemoPO">
+    insert into Memo (id, Title, Content, 
+      Statue, UserId, GmtCreated, 
+      GmtModified)
+    values (#{id,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{statue,jdbcType=SMALLINT}, #{userid,jdbcType=VARCHAR}, #{gmtcreated,jdbcType=TIMESTAMP}, 
+      #{gmtmodified,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.treeliked.darkme2.dataobject.MemoPO">
+    update Memo
+    set Title = #{title,jdbcType=VARCHAR},
+      Content = #{content,jdbcType=VARCHAR},
+      Statue = #{statue,jdbcType=SMALLINT},
+      UserId = #{userid,jdbcType=VARCHAR},
+      GmtCreated = #{gmtcreated,jdbcType=TIMESTAMP},
+      GmtModified = #{gmtmodified,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, Title, Content, Statue, UserId, GmtCreated, GmtModified
+    from Memo
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, Title, Content, Statue, UserId, GmtCreated, GmtModified
+    from Memo
+  </select>
+</mapper>

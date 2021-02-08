@@ -1,10 +1,11 @@
 package com.treeliked.darkme2.util;
 
-import com.treeliked.darkme2.constant.SessionConstant;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.Optional;
+
+import com.treeliked.darkme2.constant.SessionConstant;
 
 /**
  * 会话工具类
@@ -14,13 +15,12 @@ import java.util.HashMap;
  */
 public class SessionUtils {
 
-
     /**
      * 添加会话
      *
      * @param session 会话
-     * @param k       key
-     * @param v       value
+     * @param k key
+     * @param v value
      */
     public static void addAttribute(HttpSession session, String k, Object v) {
         if (session == null) {
@@ -33,8 +33,8 @@ public class SessionUtils {
      * 添加会话
      *
      * @param request 请求
-     * @param k       key
-     * @param v       value
+     * @param k key
+     * @param v value
      */
     public static void addAttribute(HttpServletRequest request, String k, Object v) {
         if (request == null) {
@@ -43,12 +43,11 @@ public class SessionUtils {
         addAttribute(request.getSession(), k, v);
     }
 
-
     /**
      * 添加会话
      *
      * @param request 请求
-     * @param attrs   所有会话
+     * @param attrs 所有会话
      */
     public static void addAttributes(HttpServletRequest request, HashMap<String, Object> attrs) {
         if (request == null) {
@@ -60,7 +59,6 @@ public class SessionUtils {
         attrs.forEach((k, v) -> addAttribute(request.getSession(), k, v));
     }
 
-
     /**
      * 获取会话中的用户名
      *
@@ -68,6 +66,8 @@ public class SessionUtils {
      * @return 用户名
      */
     public static String getUserNameInSession(HttpSession session) {
-        return (String) session.getAttribute(SessionConstant.KEY_OF_USER_NAME);
+        return Optional.ofNullable(session)
+                .map(s -> (String) s.getAttribute(SessionConstant.KEY_OF_USER_NAME))
+                .orElse(null);
     }
 }

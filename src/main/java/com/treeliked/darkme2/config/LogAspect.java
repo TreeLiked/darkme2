@@ -1,5 +1,8 @@
 package com.treeliked.darkme2.config;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+
 import com.treeliked.darkme2.model.Response;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -12,14 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
-
 /**
  * 打印请求/响应信息
  *
  * @author lqs2
- * @date 2018/12/5, Wed
  */
 @Aspect
 @Component
@@ -46,8 +45,7 @@ public class LogAspect {
 
         logger.info("...Request Start");
         logger.info("Remote IP: " + remoteIp);
-        logger.info("Request URL: " + requestUrl);
-        logger.info("Request METHOD: " + requestMethod);
+        logger.info("Request URL: " + requestMethod + " " + requestUrl);
         Enumeration<String> enu = request.getParameterNames();
         int i = 1;
         while (enu.hasMoreElements()) {
