@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public interface UserMapper {
     int deleteByPrimaryKey(String id);
 
-    int insert(IUser record);
+    int insert(IUserDO record);
 
     IUserDO selectByPrimaryKey(String id);
 

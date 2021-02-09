@@ -3,7 +3,7 @@ spring:
     favicon:
       enabled: false
   thymeleaf:
-    cache: false
+    cache: true
     mode: HTML
     encoding: UTF-8
     servlet:
@@ -58,4 +58,4 @@ logging:
     com:
       treeliked:
         darkme2:
-          dao: debug
+          dao: warn

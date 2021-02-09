@@ -18,7 +18,7 @@
         insert into User (id, Name, Password,
                           Email, GmtCreated, GmtModified)
         values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
-                #{email,jdbcType=VARCHAR}, #{gmtcreated,jdbcType=TIMESTAMP}, #{gmtmodified,jdbcType=TIMESTAMP})
+                #{email,jdbcType=VARCHAR}, now(), now())
     </insert>
     <update id="updateByPrimaryKey" parameterType="com.treeliked.darkme2.dataobject.IUserDO">
         update User

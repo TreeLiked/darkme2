@@ -104,7 +104,7 @@ public interface FileService {
      * @param fileId 文件id
      * @return 删除结果
      */
-    Result<String> deleteFile(String username, String fileId);
+    Result<String> deleteFile(String userId, String fileId, boolean forceDelete);
 
     /**
      * 获取文件列表中包含作者和目标用户的所有账户的映射

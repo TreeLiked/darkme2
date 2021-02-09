@@ -17,7 +17,7 @@
 
 /*文件详情对话框样式*/
 .file-detail-item-container {
-    margin-left: 80px;
+    margin-left: 10px;
     margin-bottom: 10px;
 }
 
@@ -225,7 +225,7 @@ td, th {
     /*margin-top: 50px;*/
     position: fixed;
     bottom: 0;
-    height: 50px;
+    /*height: 50px;*/
     align-items: center;
     text-align: center;
     width: 100%;
@@ -234,7 +234,9 @@ td, th {
 
 .foot {
     padding-top: 15px;
-    /*color: #F7F7F7;*/
+    padding-bottom: 5px;
+    color: #909399;
     align-content: center;
     align-self: center;
+    font-size: 13px;
 }

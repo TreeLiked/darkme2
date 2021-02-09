@@ -9,8 +9,6 @@ import java.util.List;
 import com.iutr.shared.model.Result;
 import com.iutr.shared.utils.ResultUtils;
 import com.treeliked.darkme2.constant.SessionConstant;
-import com.treeliked.darkme2.model.Response;
-import com.treeliked.darkme2.model.ResultCode;
 import com.treeliked.darkme2.model.domain.IUser;
 import com.treeliked.darkme2.service.UserService;
 import com.treeliked.darkme2.util.CookieUtils;
@@ -62,26 +60,13 @@ public class UserController {
         }
         if (user == null) {
             result.setSuccess(false);
+            result.setMessage("用户名或密码错误");
             return result;
         }
         result.setSuccess(true);
         result.setData(user);
 
-        // 写入session
-        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_NAME, user.getName());
-        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_ID, user.getId());
-        // 是否用户点击记住我
-        boolean rememberMe = true;
-        int len = rememberMe ? SessionConstant.TIME_OF_REMEMBER : SessionConstant.TIME_OF_TEMP;
-        session.setMaxInactiveInterval(len);
-        request.getServletContext().setAttribute(session.getId(), session);
-
-        // 写入cookie
-        Cookie cookie = new Cookie(SessionConstant.COOKIE_OF_USER_INFO, session.getId());
-        cookie.setMaxAge(len);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-
+        writeLoginStatusSession(request, session, response, user);
         return result;
 
     }
@@ -117,7 +102,6 @@ public class UserController {
         }
         userSession.invalidate();
 
-
         // 删除cookie
         sessionIdCookie.setMaxAge(0);
         response.addCookie(sessionIdCookie);
@@ -125,14 +109,15 @@ public class UserController {
         return ResultUtils.newSuccessfulResult();
     }
 
-    @PostMapping(value = "rv", consumes = { MediaType.APPLICATION_JSON_UTF8_VALUE })
-    public Response registerValidate(@RequestBody IUser user) throws Exception {
-        Response resp = new Response();
+    @PostMapping(value = "register", consumes = { MediaType.APPLICATION_JSON_UTF8_VALUE })
+    public Result<IUser> registerValidate(@RequestBody IUser user, HttpServletRequest request,
+            HttpServletResponse response, HttpSession session) throws Exception {
         int i = userService.insertUser(user);
         if (i != 1) {
-            resp.setCode(ResultCode.FAIL);
+            return ResultUtils.newFailedResult("用户创建失败");
         }
-        return resp;
+        writeLoginStatusSession(request, session, response, user);
+        return ResultUtils.newSuccessfulResult(userService.getUserById(user.getId()));
     }
 
     @GetMapping(value = "trunie")
@@ -159,5 +144,22 @@ public class UserController {
     @GetMapping("searchByKey")
     public Result<List<IUser>> searchUsersByNames(@RequestParam(value = "key", required = false) String key) {
         return ResultUtils.newSuccessfulResult(userService.getUsersByKey(key));
+    }
+
+    private static void writeLoginStatusSession(HttpServletRequest request, HttpSession session,
+            HttpServletResponse response, IUser user) {
+        // 写入session
+        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_NAME, user.getName());
+        SessionUtils.addAttribute(request, SessionConstant.KEY_OF_USER_ID, user.getId());
+        // 是否用户点击记住我
+        int len = SessionConstant.TIME_OF_REMEMBER;
+        session.setMaxInactiveInterval(len);
+        request.getServletContext().setAttribute(session.getId(), session);
+
+        // 写入cookie
+        Cookie cookie = new Cookie(SessionConstant.COOKIE_OF_USER_INFO, session.getId());
+        cookie.setMaxAge(len);
+        cookie.setPath("/");
+        response.addCookie(cookie);
     }
 }

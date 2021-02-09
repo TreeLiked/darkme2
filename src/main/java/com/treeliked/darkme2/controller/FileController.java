@@ -237,15 +237,14 @@ public class FileController {
     }
 
     @GetMapping(value = "rmFile")
-    public Result<String> removeFile(@RequestParam("id") String id, HttpSession session) throws Exception {
+    public Result<String> removeFile(@RequestParam("id") String fileId, HttpServletRequest request) throws Exception {
 
         // 获取已经登录用户名
-        String username = (String) session.getAttribute(SessionConstant.KEY_OF_USER_NAME);
-        if (StringUtils.isEmpty(username)) {
-            return ResultUtils.newFailedResult("您没有权限删除此文件");
-
+        String userId = CookieUtils.getSessionUserId(request);
+        if (StringUtils.isEmpty(userId)) {
+            return ResultUtils.newFailedResult("您无权删除此文件");
         }
-        return fileService.deleteFile(username, id);
+        return fileService.deleteFile(userId, fileId, false);
 
         //// 获取此文件的信息
         //IBaseFile file = fileService.getFileByFileId(id);

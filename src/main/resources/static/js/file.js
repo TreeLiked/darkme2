@@ -56,34 +56,15 @@ function searchFile(text) {
 }
 
 
-function rmFile(id, name) {
-    // alert(author);
-    // if (author === null || author !== $.session.get("un")) {
-    //     parent.parent.showBannerInfo("alert-warning", 0, "您没有权限删除该文件", 4000, 1000, true);
-    // } else {
+async function removeFile(fileId, callback) {
     $.get({
         url: "api/file/rmFile",
         data: {
-            id: id,
+            id: fileId,
         },
         dataType: "json",
-        success: function (resp) {
-            console.log(resp);
-            if (resp.code === "SUCCESS") {
-                parent.showBannerInfo("alert-success", 0, "文件 " + name + " 删除成功", 4000, 1000, true);
-                window.location.reload();
-            } else {
-                parent.showBannerInfo("alert-danger", 0, "文件 " + name + " 删除失败", 4000, 1000, true);
-            }
-            // if (result === "success") {
-            //     parent.parent.showBannerInfo("alert-success", 0, "文件 " + name + " 删除成功", 4000, 1000, true);
-            //     window.location.reload();
-            //     parent.showAmountFlags();
-            // } else {
-            //     parent.parent.showBannerInfo("alert-danger", 0, "文件 " + name + " 删除失败", 4000, 1000, true);
-            // }
-        }
+        contentType: "application/json",
+        success: result => callback(result)
     });
-    // }
 }
 

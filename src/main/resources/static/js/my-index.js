@@ -32,6 +32,7 @@ let app = new Vue({
                 loginLoading: false,
                 // 用户文件列表加载
                 userFileList: false,
+                fileDelete: false,
             },
 
             // 通用帮助对话框文案
@@ -55,8 +56,8 @@ let app = new Vue({
                 },
                 filePageParam: {
                     currentPage: 1,
-                    pageSize: 12,
-                    totalSize: 12,
+                    pageSize: 24,
+                    totalSize: 24,
                     searchKey: '',
                 },
                 // 登录或注册表单
@@ -72,10 +73,10 @@ let app = new Vue({
                 // 单次最大可以上传文件总大小1G
                 maxUploadFileSize: 1073741824,
                 // maxUploadFileSize: 2097152,
-                fileSuffixes: ['after-effects', 'ai', 'audition', 'avi', 'bridge',
-                    'css', 'csv', 'dbf', 'doc', 'dreamweaver', 'dwg', 'exe',
+                fileSuffixes: ['ae', 'ai', 'audition', 'avi', 'bridge',
+                    'css', 'csv', 'dbf', 'doc', 'dw', 'dwg', 'exe',
                     'file', 'fireworks', 'fla', 'flash', 'html', 'illustrator',
-                    'indesign', 'iso', 'javascript', 'jpg', 'json', 'mp3',
+                    'indesign', 'iso', 'js', 'jpg', 'json', 'mp3',
                     'mp4', 'pdf', 'ps', 'png', 'ppt', 'prelude',
                     'premiere', 'psd', 'rtf', 'search', 'svg', 'txt', 'xls',
                     'xml', 'zip', 'zip-1', 'docx', 'rar', 'xlsx'
@@ -88,14 +89,12 @@ let app = new Vue({
                     {"label": "7 天", "value": "7"}, {"label": "永久", "value": "3650"}
                 ],
                 fileList: [],
+                // 用户的文件列表
                 userFileList: [],
-
+                userSentCount: 0,
+                userReceivedCount: 0,
+                // 用户文件列表与时间的map对象
                 userTimedFileListMap: {},
-                // 今天，最近三天，最近七天，更早的文件列表
-                todayFileList: [],
-                threeDaysFileList: [],
-                sevenDaysFileList: [],
-                olderFileList: [],
 
                 dialogFile: {},
                 downloadFile: {},
@@ -132,26 +131,32 @@ let app = new Vue({
 
     methods: {
         handleSelect(fullKey, keyPath) {
+
             console.log(fullKey, keyPath);
             const firstKey = keyPath[0];
             switch (firstKey) {
                 case '1':
                     break;
                 case '2':
+
                     // 文件
                     if (fullKey === '2-2') {
                         // 文件帮助
                         this.commonHelp.title = '文件中转使用帮助';
-                        this.commonHelp.content = '1、未登录可用作文件中转，文件编号有效期：1（单位：天）<br>' +
-                            '2、登录后文件长期保存，有效期：30（单位：天）<br>' +
+                        this.commonHelp.content = '1、未登录可用作文件中转，文件编号有效期：1-7（单位：天）<br>' +
+                            '2、登录后文件长期保存，可选择有效期：永久（单位：天）<br>' +
                             '3、公开文件可以使用文件名或编号以进行搜索，非公开文件仅能通过编号搜索<br>' +
-                            '4、<span style="color: #CD5C5C">请勿上传或传播任何非法内容，否则后果自负</span>';
-                        this.dialogVisibility.commonHelp = true;
-                        return;
-                    }
+                            '4、文件如果指定给目标用户则该文件会出现在目标用户的文件列表中<br>' +
+                            '5、公开非加密图像类型文件可以直接预览<br>' +
+                            '6、单次上传文件总大小不得超过1G<br>' +
+                            '7、<span style="color: #CD5C5C">请勿上传或传播任何非法内容，否则后果自负</span>';
 
+                        this.dialogVisibility.commonHelp = true;
+                    }
+                    ;
                     break;
                 case '3':
+                    this.showWarningMsg("好友系统暂未开放，敬请期待");
                     // 备忘录
                     break;
                 case '6':
@@ -165,12 +170,13 @@ let app = new Vue({
                     }
                     break;
                 case '7':
-                    this.dialogVisibility.lrDialog = !this.dialogVisibility.lrDialog;
+                    this.resetAndOpenLoginDialog();
                     break;
 
                 default:
                     break;
             }
+            this.currentActiveIndex = '2-1';
         },
 
 
@@ -218,7 +224,7 @@ let app = new Vue({
                             that.$notify({
                                 title: rawFile.name + ' 上传成功',
                                 dangerouslyUseHTMLString: true,
-                                message: '文件大小：' + byte_to_KMG(rawFile.size) + '，编号：' + saveResult.data.no,
+                                message: '文件大小：' + byte_to_KMG(rawFile.size) + '<br>文件编号：' + saveResult.data.no,
                                 type: 'success',
                                 duration: 0
                             });
@@ -245,6 +251,8 @@ let app = new Vue({
                             that.$refs.fileUpload.clearFiles();
                             that.dialogVisibility.fileUploadBtn = false;
                             that.refreshFileList();
+                            that.fetchOrResetMyFileList(false);
+
                         }
 
                     } else {
@@ -253,7 +261,6 @@ let app = new Vue({
                 }
             }, (errorMsg) => {
             });
-            this.fetchOrResetMyFileList(false);
         },
         doUploadFile() {
             this.$refs.fileUpload.submit();
@@ -261,7 +268,12 @@ let app = new Vue({
 
         // 模糊查询用户
         async blurSearchUsers(key) {
+
             const that = this;
+            if (key == null || key === '' || key.trim().length === 0) {
+                this.savedData.userList = [];
+                return;
+            }
             await searchUserByKey(key, (result) => {
                 if (result.success) {
                     that.savedData.userList = result.data.map((user) => {
@@ -333,6 +345,31 @@ let app = new Vue({
                 this.downloadFileNow(file.id, '');
             }
         },
+        // 点击删除按钮
+        deleteFile(file) {
+            if (!file) {
+                this.showErrorMsg("找不到文件");
+                return;
+            }
+            const that = this;
+            this.loading.fileDelete = true;
+            removeFile(file.id, (res) => {
+                that.loading.fileDelete = false;
+                if (res.success) {
+                    that.dialogVisibility.fileDetailDialog = false;
+                    const index = that.savedData.fileList.indexOf(file);
+                    if (index !== -1) {
+                        // 删除这个元素
+                        that.savedData.fileList.splice(index, 1);
+                    }
+                    // 重新获取我的文件
+                    that.showSuccessMsg("文件 [ " + file.name + " ] 删除成功")
+                    that.fetchOrResetMyFileList(false);
+                } else {
+                    that.showErrorMsg(res.message);
+                }
+            });
+        },
 
         // 输入密码后确认下载
         confirmFileDownload() {
@@ -395,12 +432,62 @@ let app = new Vue({
                 console.log(result);
                 if (result.success) {
                     that.dialogVisibility.lrDialog = false;
+                    that.showSuccessMsg("登录成功 ～");
                     that.checkAndSetLoginStatus(result.data);
                 } else {
                     that.savedData.isLogin = false;
                     that.showErrorMsg(result.message);
                 }
             })
+        },
+
+        // 我要注册
+        doRegister() {
+            const that = this;
+            const name = this.form.lrForm.name;
+            if (!name || name.trim().length === 0) {
+                this.showWarningMsg("请输入正确的用户名");
+                return;
+            }
+            const password = this.form.lrForm.password;
+            const password2 = this.form.lrForm.password2;
+
+            if (!password || password.length === 0 || password.length > 16) {
+                this.showWarningMsg("请输入正确的密码, 0-16位字母和数字的组合");
+                return;
+            }
+            if (password2 !== password) {
+                this.showWarningMsg("两次密码不一样，请重新输入");
+                return;
+            }
+
+            this.loading.loginLoading = true;
+            checkUsername(name, (checkRes) => {
+                if (checkRes.success) {
+                    // 如果是true则有相同的用户名
+                    const hasSame = checkRes.data;
+                    if (hasSame === true) {
+                        that.showWarningMsg("用户名重复，请重新输入");
+                        that.loading.loginLoading = false;
+                    } else {
+                        register(name, password, (result) => {
+                            that.loading.loginLoading = false;
+                            if (result.success) {
+                                that.dialogVisibility.lrDialog = false;
+                                that.checkAndSetLoginStatus(result.data);
+                                that.showSuccessMsg("注册成功，已为您登录 ～");
+                            } else {
+                                that.savedData.isLogin = false;
+                                that.showErrorMsg(result.message);
+                            }
+                        })
+                    }
+                } else {
+                    that.showErrorMsg(checkRes.message);
+                }
+            });
+
+
         },
 
         // 检查登录状态
@@ -440,7 +527,17 @@ let app = new Vue({
                     that.savedData.userFileList = fileList;
                     that.savedData.userTimedFileListMap = {};
                     // 处理成map
+                    let sent = 0, received = 0;
+                    const userId = that.savedData.user.id;
                     fileList.forEach((file) => {
+                        if (file.destUser && file.destUser.id === userId) {
+                            // 收到的文件
+                            received++;
+                        }
+                        if (file.user && file.user.id === userId) {
+                            // 收到的文件
+                            sent++;
+                        }
                         const timeStr = that.formatTime(file.gmtCreated);
                         if (that.savedData.userTimedFileListMap.hasOwnProperty(timeStr)) {
                             that.savedData.userTimedFileListMap[timeStr].push(file);
@@ -451,6 +548,9 @@ let app = new Vue({
                             that.savedData.userTimedFileListMap[timeStr] = arr;
                         }
                     });
+                    that.savedData.userSentCount = sent;
+                    that.savedData.userReceivedCount = received;
+
                     console.log(that.savedData.userTimedFileListMap);
 
                 } else {
@@ -493,7 +593,7 @@ let app = new Vue({
             const that = this;
             if (this.fileHasPassword(file)) {
                 if (file.attach) {
-                    if (!this.savedData.isLogin || this.savedData.user.id !== file.destUser.id) {
+                    if (!this.savedData.isLogin || (file.destUser && this.savedData.user.id !== file.destUser.id)) {
                         // 只有当目标用户不是当前用户并且文件加密的时候无法查看文件备注
                         file.attach = "加密文件备注无法查看";
                     }
@@ -524,6 +624,9 @@ let app = new Vue({
         showWarningMsg(msg) {
             this.$message({message: msg, type: 'warning'});
         },
+        showSuccessMsg(msg) {
+            this.$message({message: msg, type: 'success'});
+        },
         // 其他
         formatTime(date) {
             return timestampFormat(new Date(date).getTime() / 1000);
@@ -541,7 +644,15 @@ let app = new Vue({
 
             return this.savedData.imageSuffixes.indexOf(suffix) !== -1;
 
-        }
+        },
+        resetAndOpenLoginDialog() {
+            // 默认每次都打开登录的对话框
+            this.dialogVisibility.loginDialog = true;
+            this.form.lrForm.name = '';
+            this.form.lrForm.password = '';
+            this.form.lrForm.password2 = '';
+            this.dialogVisibility.lrDialog = !this.dialogVisibility.lrDialog;
+        },
     },
 
 

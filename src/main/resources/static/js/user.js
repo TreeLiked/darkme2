@@ -60,9 +60,22 @@ async function register(username, password, callback) {
         cache: false,
         async: false,
         dataType: "json",
+        contentType: "application/json",
         data: JSON.stringify(body),
         success: function (result) {
             callback(result);
         }
+    });
+}
+
+async function checkUsername(username, callback) {
+    $.get({
+        url: "/api/user/trunie",
+        data: {
+            u1: username
+        },
+        dataType: "json",
+        cache: false,
+        success: result => callback(result),
     });
 }

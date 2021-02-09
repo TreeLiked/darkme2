@@ -11,6 +11,7 @@ import com.treeliked.darkme2.service.UserService;
 import com.treeliked.darkme2.util.IdUtils;
 import com.treeliked.darkme2.util.TransferUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,7 +36,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public int insertUser(IUser user) {
         user.setId(IdUtils.get32Id());
-        return userMapper.insert(user);
+        IUserDO userDO = new IUserDO();
+        BeanUtils.copyProperties(user, userDO);
+        return userMapper.insert(userDO);
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.treeliked.darkme2.model.domain.IUser;
 import com.treeliked.darkme2.model.domain.request.PageParam;
 import com.treeliked.darkme2.service.FileService;
 import com.treeliked.darkme2.service.UserService;
+import com.treeliked.darkme2.util.CosUtils;
 import com.treeliked.darkme2.util.TransferUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,27 +156,33 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Result<String> deleteFile(String username, String fileId) {
-        if (StringUtils.isEmpty(username)) {
-            return ResultUtils.newFailedResult("未登录的用户");
+    public Result<String> deleteFile(String userId, String fileId, boolean forceDelete) {
+        IBaseFile fileToDel;
+        if (!forceDelete) {
+            if (StringUtils.isEmpty(userId)) {
+                return ResultUtils.newFailedResult("未登录的用户");
+            }
+            if (StringUtils.isEmpty(fileId)) {
+                return ResultUtils.newFailedResult("删除失败，错误的文件编号");
+            }
+            fileToDel = getFileByFileId(fileId);
+            if (fileToDel == null) {
+                return ResultUtils.newFailedResult("删除失败，找不到文件");
+            }
+            if (fileToDel.getUser() == null) {
+                return ResultUtils.newFailedResult("匿名上传的文件无法删除");
+            }
+            if (!StringUtils.equals(fileToDel.getUser().getId(), userId)) {
+                return ResultUtils.newFailedResult("权限不足，无法删除文件");
+            }
+        } else {
+            fileToDel = getFileByFileId(fileId);
         }
-        if (StringUtils.isEmpty(fileId)) {
-            return ResultUtils.newFailedResult("删除失败，错误的文件编号");
-        }
-        IBaseFile fileToDel = getFileByFileId(fileId);
-        if (fileToDel == null) {
-            return ResultUtils.newFailedResult("删除失败，找不到文件");
-        }
-        if (fileToDel.getUser() == null) {
-            return ResultUtils.newFailedResult("匿名上传的文件无法删除");
-        }
-        if (!StringUtils.equals(fileToDel.getUser().getName(), username)) {
-            return ResultUtils.newFailedResult("权限不足，无法删除文件");
-        }
-        int i = fileMapper.deleteByPrimaryKey(fileId);
+        int i = newFileMapper.deleteByPrimaryKey(fileId);
         if (i != 1) {
             return ResultUtils.newFailedResult("权限不足，无法删除文件", ResultStatus.UN_HANDLE_ERROR.getCode());
         }
+        CosUtils.dropFile(fileToDel.getBucketId(), CosUtils.bucketName1);
         return ResultUtils.newSuccessfulResult();
     }
 
