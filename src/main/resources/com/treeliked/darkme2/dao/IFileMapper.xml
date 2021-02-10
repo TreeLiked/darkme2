@@ -77,7 +77,7 @@
     </select>
     <select id="selectByFileNo" parameterType="java.lang.String" resultMap="BaseResultMap">
         <include refid="selectOnly"/>
-        where No = #{fileNo,jdbcType=VARCHAR}
+        where No = #{fileNo,jdbcType=VARCHAR} limit 1
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
