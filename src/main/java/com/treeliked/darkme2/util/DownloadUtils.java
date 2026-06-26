@@ -1,12 +1,11 @@
 package com.treeliked.darkme2.util;
 
 
-import sun.misc.BASE64Encoder;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * 工具类
@@ -40,8 +39,7 @@ public class DownloadUtils {
             filename = filename.replace("+", " ");
         } else if (agent.contains(BROWSER_FIREFOX)) {
             // 火狐浏览器
-            BASE64Encoder base64Encoder = new BASE64Encoder();
-            filename = "=?utf-8?B?" + base64Encoder.encode(filename.getBytes(StandardCharsets.UTF_8)) + "?=";
+            filename = "=?utf-8?B?" + Base64.getEncoder().encodeToString(filename.getBytes(StandardCharsets.UTF_8)) + "?=";
         } else {
             // 其它浏览器
             filename = URLEncoder.encode(filename, "utf-8");

@@ -1,0 +1,12 @@
+server:
+  port: 8080
+  ssl:
+    enabled: false
+
+spring:
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    com.treeliked.darkme2: info
