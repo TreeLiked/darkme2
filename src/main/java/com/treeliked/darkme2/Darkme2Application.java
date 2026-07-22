@@ -22,7 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class Darkme2Application {
 
-    private int httpPort = 80;
+    private int httpPort = 8080;
 
     @Value("${server.port}")
     private int httpsPort;

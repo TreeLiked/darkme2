@@ -105,6 +105,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.iutr.shared</groupId>
+            <artifactId>shared-all</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/shared-all-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
