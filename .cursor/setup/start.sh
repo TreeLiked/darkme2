@@ -8,16 +8,37 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_LOG=/tmp/darkme-app.log
 
+wait_mysql() {
+  for _ in $(seq 1 "$1"); do
+    sudo mysqladmin ping >/dev/null 2>&1 && return 0
+    sleep 1
+  done
+  return 1
+}
+
 echo "Starting MySQL..."
 sudo service mysql start || true
 
-for i in $(seq 1 30); do
-  sudo mysqladmin ping >/dev/null 2>&1 && break
-  sleep 1
-done
-if ! sudo mysqladmin ping >/dev/null 2>&1; then
-  echo "MySQL did not become ready in time" >&2
-  exit 1
+if ! wait_mysql 15; then
+  # On a freshly booted pod the MySQL datadir comes from the environment
+  # image's overlayfs *lower* layer, where InnoDB's O_DIRECT probe on the redo
+  # log returns EINVAL and aborts startup. Copy the datadir up into the
+  # writable layer (only when the first start failed) and retry.
+  echo "MySQL did not come up; applying overlayfs datadir copy-up workaround..."
+  sudo service mysql stop >/dev/null 2>&1 || true
+  if sudo test -d /var/lib/mysql; then
+    sudo rm -rf /var/lib/mysql.old /var/lib/mysql.new
+    sudo cp -a /var/lib/mysql /var/lib/mysql.new
+    sudo mv /var/lib/mysql /var/lib/mysql.old
+    sudo mv /var/lib/mysql.new /var/lib/mysql
+    sudo chown -R mysql:mysql /var/lib/mysql
+    sudo rm -rf /var/lib/mysql.old
+  fi
+  sudo service mysql start || true
+  if ! wait_mysql 30; then
+    echo "MySQL did not become ready in time" >&2
+    exit 1
+  fi
 fi
 
 echo "Applying database schema (idempotent)..."
