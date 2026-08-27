@@ -30,7 +30,7 @@ server:
     context-path: /
   port: 30001
   ssl:
-    enabled: true
+    enabled: false
     key-store: classpath:4985895_zzr.iutr.cn.jks
     key-store-password: R0G67rG9
     key-store-type: JKS
